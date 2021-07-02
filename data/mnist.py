@@ -6,7 +6,7 @@ import numpy as np
 import urllib.parse
 
 from urllib.request import urlretrieve
-from DatasetFactory import Dataset
+from dataset import Dataset
 
 ######constants######
 # Absolute path of "data" directory 
@@ -22,8 +22,9 @@ class MNIST(Dataset):
                     'train-labels-idx1-ubyte.gz',
                     't10k-labels-idx1-ubyte.gz']
     
-    def get(self):
-        return MNIST()
+    class Factory:
+        def get(self):
+            return MNIST()
              
     def download_data(self):
         # Create mnist directory is non-existent

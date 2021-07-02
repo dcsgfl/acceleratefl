@@ -6,7 +6,7 @@ import numpy as np
 import urllib.parse
 
 from urllib.request import urlretrieve
-from DatasetFactory import Dataset
+from dataset import Dataset
 
 ######constants######
 # Absolute path of "data" directory 
@@ -24,9 +24,9 @@ class CIFAR10(Dataset):
                         'cifar-10-batches-bin/data_batch_4.bin',
                         'cifar-10-batches-bin/data_batch_5.bin',
                         'cifar-10-batches-bin/test_batch.bin']
-    
-    def get(self):
-        return CIFAR10()
+    class Factory:
+        def get(self):
+            return CIFAR10()
     
     def download_data(self):
         # Create cifar10 directory is non-existent
