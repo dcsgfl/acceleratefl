@@ -1,21 +1,49 @@
+import os
+import sys
 import argparse
 import torch
 
 import syft as sy
 from syft.workers import websocket_server
+from torchvision import transforms
+
+# Add data folder to path
+pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'data')
+sys.path.append(pwd)
 
 def start_websocker_server_worker(id, host, port, dataset, hook, verbose):
     server = websocket_server.WebsocketServerWorker(
-        id=id,
-        host=host,
-        port=port,
-        hook=hook,
-        verbose=verbose)
+        id = id,
+        host = host,
+        port = port,
+        hook = hook,
+        verbose = verbose)
 
-    
-    
+    # Dataset class selection
+    from datasetFactory import DatasetFactory as dftry
+    datacls = dftry.getDataset(dataset)
 
+    # Training data
+    train_data, train_targets = datacls.get_training_data()
+    dataset_train = sy.BaseDataset(
+        data = train_data,
+        targets = train_targets,
+        transform = transforms.Compose([transforms.ToTensor()])
+    )
+    server.add_dataset(dataset_train, key = dataset + '_TRAIN')
 
+    # Testing data
+    test_data, test_targets = datacls.get_testing_data()
+    dataset_test = sy.BaseDataset(
+        data = test_data,
+        targets = test_targets,
+        transform = transforms.Compose([transforms.ToTensor()])
+    )
+    server.add_dataset(dataset_test, key = dataset + '_TEST')
+
+    server.start()
+
+    return server
 
 if __name__ == '__main__':
 
@@ -46,7 +74,7 @@ if __name__ == '__main__':
         '--dataset',
         '-ds',
         type=str,
-        help='dataset used for the model: --dataset cifar10'
+        help='dataset used for the model: --dataset CIFAR10'
     )
 
     parser.add_argument(
