@@ -6,13 +6,13 @@ import numpy as np
 import urllib.parse
 
 from urllib.request import urlretrieve
-from data import data
+from DatasetFactory import Dataset
 
 ######constants######
 # Absolute path of "data" directory 
 DATADIR = os.path.join(os.path.abspath(os.path.dirname(__file__)))
 
-class mnist(data):
+class MNIST(Dataset):
     def __init__(self) -> None:
         super().__init__()
         self.path = os.path.join(DATADIR, 'mnist')
@@ -21,7 +21,10 @@ class mnist(data):
                     't10k-images-idx3-ubyte.gz',
                     'train-labels-idx1-ubyte.gz',
                     't10k-labels-idx1-ubyte.gz']
-                        
+    
+    def get(self):
+        return MNIST()
+             
     def download_data(self):
         # Create mnist directory is non-existent
         os.makedirs(self.path, exist_ok=True)
@@ -54,6 +57,8 @@ class mnist(data):
         # remove the mnist directory after use
         shutil.rmtree(self.path)
 
+        return True
+
     def get_training_data(self):
         raise NotImplementedError("ERROR: get_training_data unimplemented")
     
@@ -62,6 +67,6 @@ class mnist(data):
 
 
 if __name__ == '__main__':
-    cls = mnist()
+    cls = MNIST()
 
     cls.download_data()

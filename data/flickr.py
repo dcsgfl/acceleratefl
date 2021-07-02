@@ -6,7 +6,7 @@ import numpy as np
 import urllib.parse
 
 from urllib.request import urlretrieve
-from DatasetFactory import data
+from DatasetFactory import Dataset
 
 ######constants######
 # Absolute path of "data" directory 

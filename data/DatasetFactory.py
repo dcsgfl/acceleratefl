@@ -14,7 +14,8 @@ class DatasetFactory:
 
 class Dataset:
     def __init__(self) -> None:
-        raise NotImplementedError("ERROR: __init__ unimplemented")
+        pass
+        # raise NotImplementedError("ERROR: __init__ unimplemented")
 
     def download_data(self) -> None:
         raise NotImplementedError("ERROR: download_data unimplemented")

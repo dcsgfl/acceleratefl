@@ -12,7 +12,7 @@ from DatasetFactory import Dataset
 # Absolute path of "data" directory 
 DATADIR = os.path.join(os.path.abspath(os.path.dirname(__file__)))
 
-class cifar10(Dataset):
+class CIFAR10(Dataset):
     def __init__(self) -> None:
         super().__init__()
         self.path = os.path.join(DATADIR, 'cifar10')
@@ -24,6 +24,9 @@ class cifar10(Dataset):
                         'cifar-10-batches-bin/data_batch_4.bin',
                         'cifar-10-batches-bin/data_batch_5.bin',
                         'cifar-10-batches-bin/test_batch.bin']
+    
+    def get(self):
+        return CIFAR10()
     
     def download_data(self):
         # Create cifar10 directory is non-existent
@@ -76,6 +79,8 @@ class cifar10(Dataset):
         self.train_x, self.train_y = img[:50000], labels[:50000]
         self.test_x, self.test_y = img[50000:], labels[50000:]
 
+        return True
+
     def get_training_data(self):
         raise NotImplementedError("ERROR: get_training_data unimplemented")
     
@@ -84,6 +89,6 @@ class cifar10(Dataset):
 
 
 if __name__ == '__main__':
-    cls = cifar10()
+    cls = CIFAR10()
 
     cls.download_data()
