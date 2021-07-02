@@ -6,13 +6,13 @@ import numpy as np
 import urllib.parse
 
 from urllib.request import urlretrieve
-from data import data
+from DatasetFactory import Dataset
 
 ######constants######
 # Absolute path of "data" directory 
 DATADIR = os.path.join(os.path.abspath(os.path.dirname(__file__)))
 
-class cifar10(data):
+class cifar10(Dataset):
     def __init__(self) -> None:
         super().__init__()
         self.path = os.path.join(DATADIR, 'cifar10')
