@@ -17,7 +17,6 @@ pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'common')
 sys.path.append(pwd)
 
 from utilities import Utility as util
-import devicetocentral_pb2
 import devicetocentral_pb2_grpc
 
 def register_to_central(args):
@@ -27,8 +26,7 @@ def register_to_central(args):
         resp = stub.RegisterToCentral(
             devicetocentral_pb2_grpc.DeviceInfo (
                 ip = args.host,
-                flport = args.port,
-                id = args.id
+                flport = args.port
             )
         )
 
@@ -78,6 +76,7 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--port',
         '-p',
+        default = util.get_free_port(),
         type=int,
         help='port number on which websocket server will listen: --port 8777',
     )

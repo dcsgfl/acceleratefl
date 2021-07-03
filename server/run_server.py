@@ -1,6 +1,37 @@
 # The model owner is considered as client
+import os
 import sys
 import argparse
+import threading
+
+# Add common folder to path
+pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'common')
+sys.path.append(pwd)
+
+import devicetocentral_pb2_grpc
+from utilities import Utility as util
+
+class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
+    
+    def __init__(self):
+        self.available_devices = {}
+        self.lock = threading.Lock()
+        
+    def RegisterToCentral(self, request, context):
+        device_info = request
+        msg = request.ip + ':' + request.flport
+        id = util.get_id(msg)
+        
+        self.lock.acquire()
+        if id not in self.available_devices:
+            self.available_devices[id] = {}
+            self.available_devices[id]['ip'] = request.ip
+            self.available_devices[id]['flport'] = request.flport
+        self.lock.release()
+
+        return devicetocentral_pb2_grpc.RegStatus(
+            success = True,
+        )
 
 def parse_arguments(args = sys.argv[1:]):
 
