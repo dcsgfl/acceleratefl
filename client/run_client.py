@@ -81,7 +81,7 @@ if __name__ == '__main__':
         '--verbose',
         '-v',
         action='store_true',
-        help='start websocket server worker in verboase mode: --verbose'
+        help='start websocket server worker in verbose mode: --verbose'
     )
 
     args = parser.parse_args()
@@ -97,4 +97,3 @@ if __name__ == '__main__':
         hook = hook,
         verbose = args.verbose
     )
-

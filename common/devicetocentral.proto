@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+service DeviceToCentral {
+    rpc RegisterToCentral(DeviceInfo) returns (RegStatus) {}
+}
+
+message DeviceInfo {
+    string ip = 1;
+    string flport = 2;
+    string id = 3;
+}
+
+message RegStatus {
+    bool success = 1;
+}
+
