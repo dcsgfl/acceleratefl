@@ -13,4 +13,3 @@ message DeviceInfo {
 message RegStatus {
     bool success = 1;
 }
-

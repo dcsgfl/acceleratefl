@@ -2,6 +2,7 @@ import os
 import sys
 import argparse
 import torch
+import grpc
 
 import syft as sy
 from syft.workers import websocket_server
@@ -10,6 +11,32 @@ from torchvision import transforms
 # Add data folder to path
 pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'data')
 sys.path.append(pwd)
+
+# Add common folder to path
+pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'common')
+sys.path.append(pwd)
+
+from utilities import Utility as util
+import devicetocentral_pb2
+import devicetocentral_pb2_grpc
+
+def register_to_central(args):
+    with grpc.insecure_channel(args.centralip + ':50051') as channel:
+        stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
+        print('Registering to central server: ' + args.centralip + ':50051')
+        resp = stub.RegisterToCentral(
+            devicetocentral_pb2_grpc.DeviceInfo (
+                ip = args.host,
+                flport = args.port,
+                id = args.id
+            )
+        )
+
+        if resp.success :
+            print(args.host + ':' + args.port + ' registered...')
+            return True
+
+    return False
 
 def start_websocker_server_worker(id, host, port, dataset, hook, verbose):
     server = websocket_server.WebsocketServerWorker(
@@ -45,9 +72,7 @@ def start_websocker_server_worker(id, host, port, dataset, hook, verbose):
 
     return server
 
-if __name__ == '__main__':
-
-    #Parse arguments
+def parse_arguments(args = sys.argv[1:]):
     parser = argparse.ArgumentParser(description='Run websocket server worker')
 
     parser.add_argument(
@@ -78,13 +103,32 @@ if __name__ == '__main__':
     )
 
     parser.add_argument(
+        '--centralip',
+        'cip',
+        default='localhost',
+        help = 'central server ip address: --centralip 1.2.3.4'
+    )
+
+    parser.add_argument(
         '--verbose',
         '-v',
         action='store_true',
         help='start websocket server worker in verbose mode: --verbose'
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(args = args)
+    return args
+
+if __name__ == '__main__':
+
+    #Parse arguments
+    args = parse_arguments()
+
+    # grpc call to central server to register
+    stat = register_to_central(args)
+    if not stat:
+        print('Registration to central failed...')
+        sys.exit()
 
     # Hook PyTorch to add extra functionalities to support FL
     hook = sy.TorchHook(torch)
