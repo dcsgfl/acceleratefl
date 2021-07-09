@@ -132,21 +132,21 @@ class ResNet(nn.Module):
         return x
 
 
-def resnet18(**kwargs):
+def ResNet18(**kwargs):
     return ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
 
 
-def resnet34(**kwargs):
+def ResNet34(**kwargs):
     return ResNet(BasicBlock, [3, 4, 6, 3], **kwargs)
 
 
-def resnet50(**kwargs):
+def ResNet50(**kwargs):
     return ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
 
 
-def resnet101(**kwargs):
+def ResNet101(**kwargs):
     return ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
 
 
-def resnet152(**kwargs):
+def ResNet152(**kwargs):
     return ResNet(Bottleneck, [3, 8, 36, 3], **kwargs)

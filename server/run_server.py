@@ -14,8 +14,13 @@ from syft.workers.websocket_client import WebsocketClientWorker
 pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'common')
 sys.path.append(pwd)
 
+# Add current path
+pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'models')
+sys.path.append(pwd)
+
 import devicetocentral_pb2_grpc
 from utilities import Utility as util
+from modelFactory import ModelFactory as mdlftry
 
 class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     
@@ -75,7 +80,7 @@ def train_and_eval(worker_instances, args):
     use_cuda = args.cuda and torch.cuda.is_available()
     torch.manual_seed(args.seed)
     device = torch.device("cpu")
-    model = Net().to(device)
+    model = mdlftry.getModel(args.model).to(device)
 
 def parse_arguments(args = sys.argv[1:]):
 
