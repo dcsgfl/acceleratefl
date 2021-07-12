@@ -21,3 +21,7 @@ class LeNet(nn.Module):
         x = func.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+    
+    class Factory:
+        def get(self):
+            return LeNet()

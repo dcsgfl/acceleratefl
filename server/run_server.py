@@ -94,7 +94,7 @@ async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, 
     )
     start_time = time.time()    # TODO(optional): seperate time spent on async_fit() and network communication
     train_config.send(worker)
-    loss = await worker.async_fit(dataset_key="mnist", return_ids=[0])      # TODO: add deadline here
+    loss = await worker.async_fit(dataset_key=dataset, return_ids=[0])      # TODO: add deadline here
     model = train_config.model_ptr.get().obj
     end_time = time.time()
     duration = end_time - start_time
@@ -147,7 +147,7 @@ async def train_and_eval(worker_instances, args):
                 test_loss, test_acc=evaluate_model_on_worker(        # test accuracy
                     model_identifier="Federated model",
                     worker=worker,
-                    dataset_key="mnist_testing",
+                    dataset_key=dataset + "TEST",
                     model=traced_model,
                     nr_bins=10,
                     batch_size=128,

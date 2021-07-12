@@ -94,3 +94,7 @@ class GoogleNet(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.linear(x)
         return x
+    
+    class Factory:
+        def get(self):
+            return GoogleNet()
