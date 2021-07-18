@@ -131,9 +131,15 @@ def parse_arguments(args = sys.argv[1:]):
 def dev_profile():
     cpu_usage = psutil.cpu_percent()
     ncpus = psutil.cpu_count()
-    load = psutil.getloadavg()
+    load = psutil.os.getloadavg()
     virtual_mem = psutil.virtual_memory()
     battery = psutil.sensors_battery()
+
+    logging.info('CPU Usage: ' + str(cpu_usage))
+    logging.info('CPUs: ' + str(ncpus))
+    logging.info('Load: ' + str(load))
+    logging.info('Virtual Memory: ' + str(virtual_mem.available/(1024*1024*1024)))
+    logging.info('Battery: ' + str(battery.percent))
 
 
 if __name__ == '__main__':
@@ -148,6 +154,8 @@ if __name__ == '__main__':
     if not stat:
         print('Registration to central failed...')
         sys.exit()
+    
+    dev_profile()
 
     # Hook PyTorch to add extra functionalities to support FL
     # hook = sy.TorchHook(torch)

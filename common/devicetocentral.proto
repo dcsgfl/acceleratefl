@@ -2,6 +2,8 @@ syntax = "proto3";
 
 service DeviceToCentral {
     rpc RegisterToCentral(DeviceInfo) returns (RegStatus) {}
+    rpc DeviceProfile(DevProfileInfo) returns (ProfAck) {}
+    rpc HeartBeat(Ping) returns (Pong) {}
 }
 
 message DeviceInfo {
@@ -12,4 +14,24 @@ message DeviceInfo {
 
 message RegStatus {
     bool success = 1;
+}
+
+message DevProfileInfo {
+    float cpu_usage = 1;
+    int32 ncpus = 2;
+    float load15 = 3;
+    float virtual_mem = 4;
+    float battery = 5;
+}
+
+message ProfAck {
+    bool success = 1;
+}
+
+message Ping {
+    bool isalive = 1;
+}
+
+message Pong {
+    bool ack = 1;
 }
