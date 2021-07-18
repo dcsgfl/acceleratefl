@@ -3,10 +3,15 @@ import sys
 import argparse
 import torch
 import grpc
+import psutil
 
 import syft as sy
 from syft.workers import websocket_server
 from torchvision import transforms
+
+import threading
+
+import logging
 
 # Add data folder to path
 pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'data')
@@ -17,21 +22,24 @@ pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'common')
 sys.path.append(pwd)
 
 from utilities import Utility as util
+import devicetocentral_pb2
 import devicetocentral_pb2_grpc
 
 def register_to_central(args):
     with grpc.insecure_channel(args.centralip + ':50051') as channel:
         stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
-        print('Registering to central server: ' + args.centralip + ':50051')
+        logging.info('Registering to central server: ' + args.centralip + ':50051')
         resp = stub.RegisterToCentral(
-            devicetocentral_pb2_grpc.DeviceInfo (
+            devicetocentral_pb2.DeviceInfo (
                 ip = args.host,
                 flport = args.port
             )
         )
 
+        logging.info('Registration complete')
+
         if resp.success :
-            print(args.host + ':' + args.port + ' registered...')
+            logging.info(args.host + ':' + str(args.port) + ' registered...')
             return True
 
     return False
@@ -75,7 +83,6 @@ def parse_arguments(args = sys.argv[1:]):
 
     parser.add_argument(
         '--port',
-        '-p',
         default = util.get_free_port(),
         type=int,
         help='port number on which websocket server will listen: --port 8777',
@@ -83,7 +90,7 @@ def parse_arguments(args = sys.argv[1:]):
 
     parser.add_argument(
         '--host',
-        '-h',
+        type=str,
         default='localhost',
         help='host on which the websocket server worker should be run: --host 1.2.3.4',
     )
@@ -91,6 +98,7 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--id',
         type=str,
+        default='alice',
         help='name of the websocket server worker: --id alice'
     )
 
@@ -98,12 +106,14 @@ def parse_arguments(args = sys.argv[1:]):
         '--dataset',
         '-ds',
         type=str,
+        default='CIFAR10',
         help='dataset used for the model: --dataset CIFAR10'
     )
 
     parser.add_argument(
         '--centralip',
-        'cip',
+        '-cip',
+        type=str,
         default='localhost',
         help = 'central server ip address: --centralip 1.2.3.4'
     )
@@ -118,10 +128,17 @@ def parse_arguments(args = sys.argv[1:]):
     args = parser.parse_args(args = args)
     return args
 
+def dev_profile():
+    cpu_usage = psutil.cpu_percent()
+    ncpus = psutil.cpu_count()
+    
+
 if __name__ == '__main__':
 
     #Parse arguments
     args = parse_arguments()
+
+    logging.basicConfig(level=logging.INFO)
 
     # grpc call to central server to register
     stat = register_to_central(args)
@@ -130,13 +147,13 @@ if __name__ == '__main__':
         sys.exit()
 
     # Hook PyTorch to add extra functionalities to support FL
-    hook = sy.TorchHook(torch)
+    # hook = sy.TorchHook(torch)
 
-    server = start_websocker_server_worker(
-        id = args.id,
-        host = args.host,
-        port = args.port,
-        dataset = args.dataset,
-        hook = hook,
-        verbose = args.verbose
-    )
+    # server = start_websocker_server_worker(
+    #     id = args.id,
+    #     host = args.host,
+    #     port = args.port,
+    #     dataset = args.dataset,
+    #     hook = hook,
+    #     verbose = args.verbose
+    # )

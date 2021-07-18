@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x15\x64\x65vicetocentral.proto\"4\n\nDeviceInfo\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0e\n\x06\x66lport\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\"\x1c\n\tRegStatus\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32\x41\n\x0f\x44\x65viceToCentral\x12.\n\x11RegisterToCentral\x12\x0b.DeviceInfo\x1a\n.RegStatus\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x15\x64\x65vicetocentral.proto\"4\n\nDeviceInfo\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0e\n\x06\x66lport\x18\x02 \x01(\x05\x12\n\n\x02id\x18\x03 \x01(\t\"\x1c\n\tRegStatus\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32\x41\n\x0f\x44\x65viceToCentral\x12.\n\x11RegisterToCentral\x12\x0b.DeviceInfo\x1a\n.RegStatus\"\x00\x62\x06proto3'
 )
 
 
@@ -42,8 +42,8 @@ _DEVICEINFO = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='flport', full_name='DeviceInfo.flport', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),

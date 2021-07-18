@@ -6,7 +6,7 @@ service DeviceToCentral {
 
 message DeviceInfo {
     string ip = 1;
-    string flport = 2;
+    int32 flport = 2;
     string id = 3;
 }
 
