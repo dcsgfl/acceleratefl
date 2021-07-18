@@ -131,7 +131,10 @@ def parse_arguments(args = sys.argv[1:]):
 def dev_profile():
     cpu_usage = psutil.cpu_percent()
     ncpus = psutil.cpu_count()
-    
+    load = psutil.getloadavg()
+    virtual_mem = psutil.virtual_memory()
+    battery = psutil.sensors_battery()
+
 
 if __name__ == '__main__':
 
