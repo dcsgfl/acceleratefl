@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x15\x64\x65vicetocentral.proto\"4\n\nDeviceInfo\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0e\n\x06\x66lport\x18\x02 \x01(\x05\x12\n\n\x02id\x18\x03 \x01(\t\"\x1c\n\tRegStatus\x12\x0f\n\x07success\x18\x01 \x01(\x08\"^\n\x04Ping\x12\x11\n\tcpu_usage\x18\x01 \x01(\x02\x12\r\n\x05ncpus\x18\x02 \x01(\x05\x12\x0e\n\x06load15\x18\x03 \x01(\x02\x12\x13\n\x0bvirtual_mem\x18\x04 \x01(\x02\x12\x0f\n\x07\x62\x61ttery\x18\x05 \x01(\x02\"\x13\n\x04Pong\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\x32^\n\x0f\x44\x65viceToCentral\x12.\n\x11RegisterToCentral\x12\x0b.DeviceInfo\x1a\n.RegStatus\"\x00\x12\x1b\n\tHeartBeat\x12\x05.Ping\x1a\x05.Pong\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x15\x64\x65vicetocentral.proto\"(\n\nDeviceInfo\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0e\n\x06\x66lport\x18\x02 \x01(\x05\"(\n\tRegStatus\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\n\n\x02id\x18\x02 \x01(\t\"j\n\x04Ping\x12\x11\n\tcpu_usage\x18\x01 \x01(\x02\x12\r\n\x05ncpus\x18\x02 \x01(\x05\x12\x0e\n\x06load15\x18\x03 \x01(\x02\x12\x13\n\x0bvirtual_mem\x18\x04 \x01(\x02\x12\x0f\n\x07\x62\x61ttery\x18\x05 \x01(\x02\x12\n\n\x02id\x18\x06 \x01(\t\"\x13\n\x04Pong\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\x32^\n\x0f\x44\x65viceToCentral\x12.\n\x11RegisterToCentral\x12\x0b.DeviceInfo\x1a\n.RegStatus\"\x00\x12\x1b\n\tHeartBeat\x12\x05.Ping\x1a\x05.Pong\"\x00\x62\x06proto3'
 )
 
 
@@ -47,13 +47,6 @@ _DEVICEINFO = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='id', full_name='DeviceInfo.id', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -67,7 +60,7 @@ _DEVICEINFO = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=25,
-  serialized_end=77,
+  serialized_end=65,
 )
 
 
@@ -86,6 +79,13 @@ _REGSTATUS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='id', full_name='RegStatus.id', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -98,7 +98,7 @@ _REGSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=79,
+  serialized_start=67,
   serialized_end=107,
 )
 
@@ -146,6 +146,13 @@ _PING = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='id', full_name='Ping.id', index=5,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -159,7 +166,7 @@ _PING = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=109,
-  serialized_end=203,
+  serialized_end=215,
 )
 
 
@@ -190,8 +197,8 @@ _PONG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=205,
-  serialized_end=224,
+  serialized_start=217,
+  serialized_end=236,
 )
 
 DESCRIPTOR.message_types_by_name['DeviceInfo'] = _DEVICEINFO
@@ -237,8 +244,8 @@ _DEVICETOCENTRAL = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=226,
-  serialized_end=320,
+  serialized_start=238,
+  serialized_end=332,
   methods=[
   _descriptor.MethodDescriptor(
     name='RegisterToCentral',

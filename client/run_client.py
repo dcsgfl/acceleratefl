@@ -42,6 +42,7 @@ def register_to_central(args):
 
         if resp.success :
             logging.info(args.host + ':' + str(args.port) + ' registered with id' + resp.id + '...')
+            global devid
             devid = resp.id
             return True
 
@@ -137,7 +138,7 @@ def heartbeat(args):
         time.sleep(5)
         load = psutil.os.getloadavg()
         virt_mem = psutil.virtual_memory()
-        battery_percent = psutil.sensors_battery()
+        battery = psutil.sensors_battery()
 
         with grpc.insecure_channel(args.centralip + ':50051') as channel:
             stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
@@ -148,7 +149,7 @@ def heartbeat(args):
                     ncpus = psutil.cpu_count(),
                     load15 = load[2],
                     virtual_mem = virt_mem.available/(1024*1024*1024),
-                    battery = battery_percent,
+                    battery = battery.percent,
                     id = devid
                 )
             )
@@ -159,21 +160,15 @@ def heartbeat(args):
                 logging.info('Connection to server failed...')
                 return
 
-
-
-    # logging.info('CPU Usage: ' + str(cpu_usage))
-    # logging.info('CPUs: ' + str(ncpus))
-    # logging.info('Load: ' + str(load))
-    # logging.info('Virtual Memory: ' + str(virtual_mem.available/(1024*1024*1024)))
-    # logging.info('Battery: ' + str(battery.percent))
-
-
 if __name__ == '__main__':
 
     #Parse arguments
     args = parse_arguments()
 
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        level=logging.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S')
 
     # grpc call to central server to register
     stat = register_to_central(args)

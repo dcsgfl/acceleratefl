@@ -53,6 +53,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         
         return devicetocentral_pb2.RegStatus(
             success = True,
+            id = id
         )
     
     def HeartBeat(self, request, context):
@@ -64,7 +65,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         self.available_devices[request.id]['battery'] = request.battery
         self.lock.release()
 
-        logging.info(id + ': [cpu_usage: ' + str(request.cpu_usage) +
+        logging.info(request.id + ': [cpu_usage: ' + str(request.cpu_usage) +
                             ', ncpus: ' + str(request.ncpus) + 
                             ', load: ' + str(request.load15) +
                             ', virtual_mem: ' + str(request.virtual_mem) +
@@ -260,7 +261,10 @@ if __name__ == '__main__':
 
     args = parse_arguments()
 
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        level=logging.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S')
     devcentral = DeviceToCentralServicer()
     
     grpcservice = threading.Thread(target=grpcServe, args=(devcentral, ))
