@@ -48,6 +48,34 @@ def register_to_central(args):
 
     return False
 
+def heartbeat(args):
+
+    while(True):
+        time.sleep(5)
+        load = psutil.os.getloadavg()
+        virt_mem = psutil.virtual_memory()
+        battery = psutil.sensors_battery()
+
+        with grpc.insecure_channel(args.centralip + ':50051') as channel:
+            stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
+            logging.info('Heat beat to server...')
+            resp = stub.HeartBeat(
+                devicetocentral_pb2.Ping (
+                    cpu_usage = psutil.cpu_percent(),
+                    ncpus = psutil.cpu_count(),
+                    load15 = load[2],
+                    virtual_mem = virt_mem.available/(1024*1024*1024),
+                    battery = battery.percent,
+                    id = devid
+                )
+            )
+
+            if resp.ack :
+                logging.info('Heart beat success...')
+            else:
+                logging.info('Connection to server failed...')
+                return
+
 def start_websocker_server_worker(id, host, port, dataset, hook, verbose):
     server = websocket_server.WebsocketServerWorker(
         id = id,
@@ -132,33 +160,6 @@ def parse_arguments(args = sys.argv[1:]):
     args = parser.parse_args(args = args)
     return args
 
-def heartbeat(args):
-
-    while(True):
-        time.sleep(5)
-        load = psutil.os.getloadavg()
-        virt_mem = psutil.virtual_memory()
-        battery = psutil.sensors_battery()
-
-        with grpc.insecure_channel(args.centralip + ':50051') as channel:
-            stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
-            logging.info('Heat beat to server...')
-            resp = stub.HeartBeat(
-                devicetocentral_pb2.Ping (
-                    cpu_usage = psutil.cpu_percent(),
-                    ncpus = psutil.cpu_count(),
-                    load15 = load[2],
-                    virtual_mem = virt_mem.available/(1024*1024*1024),
-                    battery = battery.percent,
-                    id = devid
-                )
-            )
-
-            if resp.ack :
-                logging.info('Heart beat success...')
-            else:
-                logging.info('Connection to server failed...')
-                return
 
 if __name__ == '__main__':
 
