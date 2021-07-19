@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x15\x64\x65vicetocentral.proto\"4\n\nDeviceInfo\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0e\n\x06\x66lport\x18\x02 \x01(\x05\x12\n\n\x02id\x18\x03 \x01(\t\"\x1c\n\tRegStatus\x12\x0f\n\x07success\x18\x01 \x01(\x08\"h\n\x0e\x44\x65vProfileInfo\x12\x11\n\tcpu_usage\x18\x01 \x01(\x02\x12\r\n\x05ncpus\x18\x02 \x01(\x05\x12\x0e\n\x06load15\x18\x03 \x01(\x02\x12\x13\n\x0bvirtual_mem\x18\x04 \x01(\x02\x12\x0f\n\x07\x62\x61ttery\x18\x05 \x01(\x02\"\x1a\n\x07ProfAck\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\x17\n\x04Ping\x12\x0f\n\x07isalive\x18\x01 \x01(\x08\"\x13\n\x04Pong\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\x32\x8c\x01\n\x0f\x44\x65viceToCentral\x12.\n\x11RegisterToCentral\x12\x0b.DeviceInfo\x1a\n.RegStatus\"\x00\x12,\n\rDeviceProfile\x12\x0f.DevProfileInfo\x1a\x08.ProfAck\"\x00\x12\x1b\n\tHeartBeat\x12\x05.Ping\x1a\x05.Pong\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x15\x64\x65vicetocentral.proto\"4\n\nDeviceInfo\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0e\n\x06\x66lport\x18\x02 \x01(\x05\x12\n\n\x02id\x18\x03 \x01(\t\"\x1c\n\tRegStatus\x12\x0f\n\x07success\x18\x01 \x01(\x08\"^\n\x04Ping\x12\x11\n\tcpu_usage\x18\x01 \x01(\x02\x12\r\n\x05ncpus\x18\x02 \x01(\x05\x12\x0e\n\x06load15\x18\x03 \x01(\x02\x12\x13\n\x0bvirtual_mem\x18\x04 \x01(\x02\x12\x0f\n\x07\x62\x61ttery\x18\x05 \x01(\x02\"\x13\n\x04Pong\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\x32^\n\x0f\x44\x65viceToCentral\x12.\n\x11RegisterToCentral\x12\x0b.DeviceInfo\x1a\n.RegStatus\"\x00\x12\x1b\n\tHeartBeat\x12\x05.Ping\x1a\x05.Pong\"\x00\x62\x06proto3'
 )
 
 
@@ -103,44 +103,44 @@ _REGSTATUS = _descriptor.Descriptor(
 )
 
 
-_DEVPROFILEINFO = _descriptor.Descriptor(
-  name='DevProfileInfo',
-  full_name='DevProfileInfo',
+_PING = _descriptor.Descriptor(
+  name='Ping',
+  full_name='Ping',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='cpu_usage', full_name='DevProfileInfo.cpu_usage', index=0,
+      name='cpu_usage', full_name='Ping.cpu_usage', index=0,
       number=1, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='ncpus', full_name='DevProfileInfo.ncpus', index=1,
+      name='ncpus', full_name='Ping.ncpus', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='load15', full_name='DevProfileInfo.load15', index=2,
+      name='load15', full_name='Ping.load15', index=2,
       number=3, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='virtual_mem', full_name='DevProfileInfo.virtual_mem', index=3,
+      name='virtual_mem', full_name='Ping.virtual_mem', index=3,
       number=4, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='battery', full_name='DevProfileInfo.battery', index=4,
+      name='battery', full_name='Ping.battery', index=4,
       number=5, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -159,71 +159,7 @@ _DEVPROFILEINFO = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=109,
-  serialized_end=213,
-)
-
-
-_PROFACK = _descriptor.Descriptor(
-  name='ProfAck',
-  full_name='ProfAck',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='success', full_name='ProfAck.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=215,
-  serialized_end=241,
-)
-
-
-_PING = _descriptor.Descriptor(
-  name='Ping',
-  full_name='Ping',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='isalive', full_name='Ping.isalive', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=243,
-  serialized_end=266,
+  serialized_end=203,
 )
 
 
@@ -254,14 +190,12 @@ _PONG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=268,
-  serialized_end=287,
+  serialized_start=205,
+  serialized_end=224,
 )
 
 DESCRIPTOR.message_types_by_name['DeviceInfo'] = _DEVICEINFO
 DESCRIPTOR.message_types_by_name['RegStatus'] = _REGSTATUS
-DESCRIPTOR.message_types_by_name['DevProfileInfo'] = _DEVPROFILEINFO
-DESCRIPTOR.message_types_by_name['ProfAck'] = _PROFACK
 DESCRIPTOR.message_types_by_name['Ping'] = _PING
 DESCRIPTOR.message_types_by_name['Pong'] = _PONG
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -279,20 +213,6 @@ RegStatus = _reflection.GeneratedProtocolMessageType('RegStatus', (_message.Mess
   # @@protoc_insertion_point(class_scope:RegStatus)
   })
 _sym_db.RegisterMessage(RegStatus)
-
-DevProfileInfo = _reflection.GeneratedProtocolMessageType('DevProfileInfo', (_message.Message,), {
-  'DESCRIPTOR' : _DEVPROFILEINFO,
-  '__module__' : 'devicetocentral_pb2'
-  # @@protoc_insertion_point(class_scope:DevProfileInfo)
-  })
-_sym_db.RegisterMessage(DevProfileInfo)
-
-ProfAck = _reflection.GeneratedProtocolMessageType('ProfAck', (_message.Message,), {
-  'DESCRIPTOR' : _PROFACK,
-  '__module__' : 'devicetocentral_pb2'
-  # @@protoc_insertion_point(class_scope:ProfAck)
-  })
-_sym_db.RegisterMessage(ProfAck)
 
 Ping = _reflection.GeneratedProtocolMessageType('Ping', (_message.Message,), {
   'DESCRIPTOR' : _PING,
@@ -317,8 +237,8 @@ _DEVICETOCENTRAL = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=290,
-  serialized_end=430,
+  serialized_start=226,
+  serialized_end=320,
   methods=[
   _descriptor.MethodDescriptor(
     name='RegisterToCentral',
@@ -331,19 +251,9 @@ _DEVICETOCENTRAL = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
-    name='DeviceProfile',
-    full_name='DeviceToCentral.DeviceProfile',
-    index=1,
-    containing_service=None,
-    input_type=_DEVPROFILEINFO,
-    output_type=_PROFACK,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
     name='HeartBeat',
     full_name='DeviceToCentral.HeartBeat',
-    index=2,
+    index=1,
     containing_service=None,
     input_type=_PING,
     output_type=_PONG,

@@ -10,6 +10,7 @@ from syft.workers import websocket_server
 from torchvision import transforms
 
 import threading
+import time
 
 import logging
 
@@ -25,6 +26,7 @@ from utilities import Utility as util
 import devicetocentral_pb2
 import devicetocentral_pb2_grpc
 
+devid = ""
 def register_to_central(args):
     with grpc.insecure_channel(args.centralip + ':50051') as channel:
         stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
@@ -39,7 +41,8 @@ def register_to_central(args):
         logging.info('Registration complete')
 
         if resp.success :
-            logging.info(args.host + ':' + str(args.port) + ' registered...')
+            logging.info(args.host + ':' + str(args.port) + ' registered with id' + resp.id + '...')
+            devid = resp.id
             return True
 
     return False
@@ -128,18 +131,41 @@ def parse_arguments(args = sys.argv[1:]):
     args = parser.parse_args(args = args)
     return args
 
-def dev_profile():
-    cpu_usage = psutil.cpu_percent()
-    ncpus = psutil.cpu_count()
-    load = psutil.os.getloadavg()
-    virtual_mem = psutil.virtual_memory()
-    battery = psutil.sensors_battery()
+def heartbeat(args):
 
-    logging.info('CPU Usage: ' + str(cpu_usage))
-    logging.info('CPUs: ' + str(ncpus))
-    logging.info('Load: ' + str(load))
-    logging.info('Virtual Memory: ' + str(virtual_mem.available/(1024*1024*1024)))
-    logging.info('Battery: ' + str(battery.percent))
+    while(True):
+        time.sleep(5)
+        load = psutil.os.getloadavg()
+        virt_mem = psutil.virtual_memory()
+        battery_percent = psutil.sensors_battery()
+
+        with grpc.insecure_channel(args.centralip + ':50051') as channel:
+            stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
+            logging.info('Heat beat to server...')
+            resp = stub.HeartBeat(
+                devicetocentral_pb2.Ping (
+                    cpu_usage = psutil.cpu_percent(),
+                    ncpus = psutil.cpu_count(),
+                    load15 = load[2],
+                    virtual_mem = virt_mem.available/(1024*1024*1024),
+                    battery = battery_percent,
+                    id = devid
+                )
+            )
+
+            if resp.ack :
+                logging.info('Heart beat success...')
+            else:
+                logging.info('Connection to server failed...')
+                return
+
+
+
+    # logging.info('CPU Usage: ' + str(cpu_usage))
+    # logging.info('CPUs: ' + str(ncpus))
+    # logging.info('Load: ' + str(load))
+    # logging.info('Virtual Memory: ' + str(virtual_mem.available/(1024*1024*1024)))
+    # logging.info('Battery: ' + str(battery.percent))
 
 
 if __name__ == '__main__':
@@ -155,7 +181,9 @@ if __name__ == '__main__':
         print('Registration to central failed...')
         sys.exit()
     
-    dev_profile()
+    heartbeat_service = threading.Thread(target=heartbeat, args=(args, ))
+    heartbeat_service.start()
+    heartbeat_service.join()
 
     # Hook PyTorch to add extra functionalities to support FL
     # hook = sy.TorchHook(torch)

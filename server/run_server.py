@@ -54,6 +54,26 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         return devicetocentral_pb2.RegStatus(
             success = True,
         )
+    
+    def HeartBeat(self, request, context):
+        self.lock.acquire()
+        self.available_devices[request.id]['cpu_usage'] = request.cpu_usage
+        self.available_devices[request.id]['ncpus'] = request.ncpus
+        self.available_devices[request.id]['load'] = request.load15
+        self.available_devices[request.id]['virtual_mem'] = request.virtual_mem
+        self.available_devices[request.id]['battery'] = request.battery
+        self.lock.release()
+
+        logging.info(id + ': [cpu_usage: ' + str(request.cpu_usage) +
+                            ', ncpus: ' + str(request.ncpus) + 
+                            ', load: ' + str(request.load15) +
+                            ', virtual_mem: ' + str(request.virtual_mem) +
+                            ', battery: ' + str(request.battery) +
+                            ']')
+
+        return devicetocentral_pb2.Pong(
+            ack = True,
+        )
 
 def set_worker_conn(hook, devcentral, verbose):
     worker_instances = {}

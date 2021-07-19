@@ -19,11 +19,6 @@ class DeviceToCentralStub(object):
                 request_serializer=devicetocentral__pb2.DeviceInfo.SerializeToString,
                 response_deserializer=devicetocentral__pb2.RegStatus.FromString,
                 )
-        self.DeviceProfile = channel.unary_unary(
-                '/DeviceToCentral/DeviceProfile',
-                request_serializer=devicetocentral__pb2.DevProfileInfo.SerializeToString,
-                response_deserializer=devicetocentral__pb2.ProfAck.FromString,
-                )
         self.HeartBeat = channel.unary_unary(
                 '/DeviceToCentral/HeartBeat',
                 request_serializer=devicetocentral__pb2.Ping.SerializeToString,
@@ -35,12 +30,6 @@ class DeviceToCentralServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def RegisterToCentral(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def DeviceProfile(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -59,11 +48,6 @@ def add_DeviceToCentralServicer_to_server(servicer, server):
                     servicer.RegisterToCentral,
                     request_deserializer=devicetocentral__pb2.DeviceInfo.FromString,
                     response_serializer=devicetocentral__pb2.RegStatus.SerializeToString,
-            ),
-            'DeviceProfile': grpc.unary_unary_rpc_method_handler(
-                    servicer.DeviceProfile,
-                    request_deserializer=devicetocentral__pb2.DevProfileInfo.FromString,
-                    response_serializer=devicetocentral__pb2.ProfAck.SerializeToString,
             ),
             'HeartBeat': grpc.unary_unary_rpc_method_handler(
                     servicer.HeartBeat,
@@ -94,23 +78,6 @@ class DeviceToCentral(object):
         return grpc.experimental.unary_unary(request, target, '/DeviceToCentral/RegisterToCentral',
             devicetocentral__pb2.DeviceInfo.SerializeToString,
             devicetocentral__pb2.RegStatus.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def DeviceProfile(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/DeviceToCentral/DeviceProfile',
-            devicetocentral__pb2.DevProfileInfo.SerializeToString,
-            devicetocentral__pb2.ProfAck.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
