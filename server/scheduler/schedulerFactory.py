@@ -7,7 +7,7 @@ class SchedulerFactory:
         SchedulerFactory.factories.put[id] = dftory
     addFactory = staticmethod(addFactory)
     
-    def getModel(id):
+    def getScheduler(id):
         if id not in SchedulerFactory.factories:
             SchedulerFactory.factories[id] = eval(id + '.Factory()')
 

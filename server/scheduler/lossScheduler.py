@@ -27,3 +27,7 @@ class LOSSched:
             if(dev.id in selected_devid):
                 res.append(dev)
         return (res)
+
+    class Factory:
+        def get(self):
+            return LOSSched()

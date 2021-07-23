@@ -21,8 +21,12 @@ import logging
 pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'common')
 sys.path.append(pwd)
 
-# Add current path
+# Add models folder path
 pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'models')
+sys.path.append(pwd)
+
+# Add scheduler folder to path
+pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'scheduler')
 sys.path.append(pwd)
 
 import devicetocentral_pb2
@@ -30,6 +34,7 @@ import devicetocentral_pb2_grpc
 
 from utilities import Utility as util
 from modelFactory import ModelFactory as mdlftry
+from schedulerFactory import SchedulerFactory as schedftry
 
 class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     
@@ -195,6 +200,20 @@ async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, 
 #     if args.save_model:
 #         torch.save(model.state_dict(), "mnist_cnn.pt")
 
+def schedule_best_worker_instances(devcentral, sched_type='PYSched'):
+    scheduler = schedftry.getScheduler(sched_type)
+
+def train_and_eval(args, devcentral):
+    for curr_round in range(0, args.epochs):
+        selected_worker_instances = schedule_best_worker_instances(devcentral)
+
+def grpcServe(devcentral):
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    devicetocentral_pb2_grpc.add_DeviceToCentralServicer_to_server(devcentral, server)
+    server.add_insecure_port('localhost:50051')
+    server.start()
+    server.wait_for_termination()
+
 def parse_arguments(args = sys.argv[1:]):
 
     #Parse arguments
@@ -250,12 +269,6 @@ def parse_arguments(args = sys.argv[1:]):
     args = parser.parse_args(args = args)
     return args
 
-def grpcServe(devcentral):
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    devicetocentral_pb2_grpc.add_DeviceToCentralServicer_to_server(devcentral, server)
-    server.add_insecure_port('localhost:50051')
-    server.start()
-    server.wait_for_termination()
 
 if __name__ == '__main__':
 
@@ -269,6 +282,10 @@ if __name__ == '__main__':
     
     grpcservice = threading.Thread(target=grpcServe, args=(devcentral, ))
     grpcservice.start()
+
+    train_and_eval(args, devcentral)
+
+
 
     # hook = sy.TorchHook(torch)
     
