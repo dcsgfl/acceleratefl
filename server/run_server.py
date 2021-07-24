@@ -81,6 +81,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
 
         return devicetocentral_pb2.Pong(
             ack = True,
+        )
 
  # Loss function
 
