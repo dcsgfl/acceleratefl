@@ -51,6 +51,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         self.lock.acquire()
         if id not in self.available_devices:
             self.available_devices[id] = {}
+            self.available_devices[id]['id'] = id
             self.available_devices[id]['ip'] = request.ip
             self.available_devices[id]['flport'] = request.flport
         self.lock.release()
@@ -204,7 +205,17 @@ def schedule_best_worker_instances(available_clients, client_threshold=10, sched
     return scheduler.select_worker_instances(available_clients, client_threshold)
 
 
-def train_and_eval(devcentral, client_threshold, verbose):
+def train_and_eval(args, devcentral, client_threshold, verbose):
+    use_cuda = args.cuda and torch.cuda.is_available()
+    torch.manual_seed(args.seed)
+    device = torch.device("cpu")
+    model = mdlftry.getModel(args.model).to(device)
+    traced_model = torch.jit.trace(model, torch.zeros([1, 3, 32, 32], dtype=torch.float).to(device))
+    max_fed_epoch = args.fedepoch
+    learning_rate = args.lr
+    dataset = args.dataset
+    batch_size = 128
+
     for curr_round in range(0, args.epochs):
         devcentral.lock.acquire()
         temp_instances = copy.deepcopy(devcentral.available_devices)
@@ -213,6 +224,10 @@ def train_and_eval(devcentral, client_threshold, verbose):
         
         hook = sy.TorchHook(torch)
         worker_instances = set_worker_conn(hook, selected_worker_instances, verbose)
+
+        results = {}
+        for worker in worker_instances:
+            results[worker['id']] = fit_model_on_worker(worker, traced_model, batch_size, max_fed_epoch, learning_rate, dataset)
 
 def grpcServe(devcentral):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
@@ -291,7 +306,7 @@ if __name__ == '__main__':
     grpcservice.start()
 
     client_threshold = 10
-    train_and_eval(devcentral, client_threshold, args.verbose)
+    train_and_eval(args, devcentral, client_threshold, args.verbose)
 
     grpcservice.join()
     
