@@ -2,7 +2,7 @@ class LOSSched:
     def __init__(self):
         pass
 
-    def stat_scheduler(_epoch, client_list, num_of_selected, dev_profile, evalloss):
+    def select_worker_instances(_epoch, client_list, num_of_selected, dev_profile, evalloss):
         if(_epoch==1):
             return(client_list)
 

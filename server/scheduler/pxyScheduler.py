@@ -91,7 +91,7 @@ class PXYSched:
 
         return compMat
 
-    def stat_scheduler(self, _epoch, client_list, num_of_selected, dev_profile):
+    def select_worker_instances(self, _epoch, client_list, num_of_selected, dev_profile):
         if(_epoch==1):
             return(client_list)
 

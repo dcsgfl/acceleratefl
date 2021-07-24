@@ -57,7 +57,7 @@ class PYSched:
 
         return(d)
 
-    def stat_scheduler(self, _epoch, client_list, num_of_selected, dev_profile):    #p(y)
+    def select_worker_instances(self, _epoch, client_list, num_of_selected, dev_profile):    #p(y)
         if(_epoch==1):
             return(client_list)
 
