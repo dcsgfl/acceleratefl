@@ -12,4 +12,4 @@ class SchedulerFactory:
             SchedulerFactory.factories[id] = eval(id + '.Factory()')
 
         return SchedulerFactory.factories[id].get()
-    getDataset = staticmethod(getModel)
+    getDataset = staticmethod(getScheduler)

@@ -5,6 +5,7 @@ import time
 import asyncio
 import argparse
 import threading
+import copy
 
 import torch
 import torch.nn as nn
@@ -79,18 +80,6 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
 
         return devicetocentral_pb2.Pong(
             ack = True,
-        )
-
-def set_worker_conn(hook, devcentral, verbose):
-    worker_instances = {}
-    for devid in devcentral.available_devices:
-        dev = devcentral.available_devices[devid]
-        kwargs_websocket = {'host' : dev['ip'], 'hook' : hook, 'verbose' : verbose}
-        clientWorker = WebsocketClientWorker(id = devid, port = dev['flport'], **kwargs_websocket)
-        clientWorker.clear_objects_remote()
-        worker_instances.append(clientWorker)
-    
-    return worker_instances
 
  # Loss function
 
@@ -200,12 +189,30 @@ async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, 
 #     if args.save_model:
 #         torch.save(model.state_dict(), "mnist_cnn.pt")
 
-def schedule_best_worker_instances(devcentral, sched_type='PYSched'):
-    scheduler = schedftry.getScheduler(sched_type)
+def set_worker_conn(hook, available_devices, verbose):
+    worker_instances = {}
+    for devid in available_devices:
+        kwargs_websocket = {'host' : dev['ip'], 'hook' : hook, 'verbose' : verbose}
+        clientWorker = WebsocketClientWorker(id = devid, port = dev['flport'], **kwargs_websocket)
+        clientWorker.clear_objects_remote()
+        worker_instances.append(clientWorker)
+    
+    return worker_instances
 
-def train_and_eval(args, devcentral):
+def schedule_best_worker_instances(available_clients, client_threshold=10, sched_type='PYSched'):
+    scheduler = schedftry.getScheduler(sched_type)
+    return scheduler.select_worker_instances(available_clients, client_threshold)
+
+
+def train_and_eval(devcentral, client_threshold, verbose):
     for curr_round in range(0, args.epochs):
-        selected_worker_instances = schedule_best_worker_instances(devcentral)
+        devcentral.lock.acquire()
+        temp_instances = copy.deepcopy(devcentral.available_devices)
+        devcentral.lock.release()
+        selected_worker_instances = schedule_best_worker_instances(temp_instances, client_threshold)
+        
+        hook = sy.TorchHook(torch)
+        worker_instances = set_worker_conn(hook, selected_worker_instances, verbose)
 
 def grpcServe(devcentral):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
@@ -283,13 +290,8 @@ if __name__ == '__main__':
     grpcservice = threading.Thread(target=grpcServe, args=(devcentral, ))
     grpcservice.start()
 
-    train_and_eval(args, devcentral)
-
-
-
-    # hook = sy.TorchHook(torch)
-    
-    # worker_instances = set_worker_conn(hook, devcentral, args.verbose)
+    client_threshold = 10
+    train_and_eval(devcentral, client_threshold, args.verbose)
 
     grpcservice.join()
     
