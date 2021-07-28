@@ -2,7 +2,7 @@
 import os
 import sys
 
-pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'summary')
+pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'common','summary')
 sys.path.append(pwd)
 
 from cluster import cluster_hist
