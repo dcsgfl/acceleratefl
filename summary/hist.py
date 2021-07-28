@@ -84,3 +84,25 @@ class HistSummary(object):
 
     def __str__(self):
         return self.toJson()
+
+    def toArray(self, keySpace):
+
+        arr = np.zeros(len(keySpace))
+        arrIdx = 0
+
+        for key in keySpace:
+            if key in self.values.keys():
+                arr[arrIdx] = float(self.values[key])
+            arrIdx += 1
+
+        return arr
+
+    def toFrequencyArray(self, keySpace):
+
+        
+        arr = self.toArray(keySpace)
+        denom = 0.0
+        for key in self.values.keys():
+            denom += float(self.values[key])
+
+        return arr / denom
