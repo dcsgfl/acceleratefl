@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x15\x64\x65vicetocentral.proto\"4\n\nDeviceInfo\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0e\n\x06\x66lport\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\"\x1c\n\tRegStatus\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32\x41\n\x0f\x44\x65viceToCentral\x12.\n\x11RegisterToCentral\x12\x0b.DeviceInfo\x1a\n.RegStatus\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x15\x64\x65vicetocentral.proto\"(\n\nDeviceInfo\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0e\n\x06\x66lport\x18\x02 \x01(\x05\"(\n\tRegStatus\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\n\n\x02id\x18\x02 \x01(\t\"j\n\x04Ping\x12\x11\n\tcpu_usage\x18\x01 \x01(\x02\x12\r\n\x05ncpus\x18\x02 \x01(\x05\x12\x0e\n\x06load15\x18\x03 \x01(\x02\x12\x13\n\x0bvirtual_mem\x18\x04 \x01(\x02\x12\x0f\n\x07\x62\x61ttery\x18\x05 \x01(\x02\x12\n\n\x02id\x18\x06 \x01(\t\"\x13\n\x04Pong\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\x32^\n\x0f\x44\x65viceToCentral\x12.\n\x11RegisterToCentral\x12\x0b.DeviceInfo\x1a\n.RegStatus\"\x00\x12\x1b\n\tHeartBeat\x12\x05.Ping\x1a\x05.Pong\"\x00\x62\x06proto3'
 )
 
 
@@ -42,15 +42,8 @@ _DEVICEINFO = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='flport', full_name='DeviceInfo.flport', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='id', full_name='DeviceInfo.id', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -67,7 +60,7 @@ _DEVICEINFO = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=25,
-  serialized_end=77,
+  serialized_end=65,
 )
 
 
@@ -86,6 +79,13 @@ _REGSTATUS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='id', full_name='RegStatus.id', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -98,12 +98,113 @@ _REGSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=79,
+  serialized_start=67,
   serialized_end=107,
+)
+
+
+_PING = _descriptor.Descriptor(
+  name='Ping',
+  full_name='Ping',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='cpu_usage', full_name='Ping.cpu_usage', index=0,
+      number=1, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='ncpus', full_name='Ping.ncpus', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='load15', full_name='Ping.load15', index=2,
+      number=3, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='virtual_mem', full_name='Ping.virtual_mem', index=3,
+      number=4, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='battery', full_name='Ping.battery', index=4,
+      number=5, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='id', full_name='Ping.id', index=5,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=109,
+  serialized_end=215,
+)
+
+
+_PONG = _descriptor.Descriptor(
+  name='Pong',
+  full_name='Pong',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='ack', full_name='Pong.ack', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=217,
+  serialized_end=236,
 )
 
 DESCRIPTOR.message_types_by_name['DeviceInfo'] = _DEVICEINFO
 DESCRIPTOR.message_types_by_name['RegStatus'] = _REGSTATUS
+DESCRIPTOR.message_types_by_name['Ping'] = _PING
+DESCRIPTOR.message_types_by_name['Pong'] = _PONG
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 DeviceInfo = _reflection.GeneratedProtocolMessageType('DeviceInfo', (_message.Message,), {
@@ -120,6 +221,20 @@ RegStatus = _reflection.GeneratedProtocolMessageType('RegStatus', (_message.Mess
   })
 _sym_db.RegisterMessage(RegStatus)
 
+Ping = _reflection.GeneratedProtocolMessageType('Ping', (_message.Message,), {
+  'DESCRIPTOR' : _PING,
+  '__module__' : 'devicetocentral_pb2'
+  # @@protoc_insertion_point(class_scope:Ping)
+  })
+_sym_db.RegisterMessage(Ping)
+
+Pong = _reflection.GeneratedProtocolMessageType('Pong', (_message.Message,), {
+  'DESCRIPTOR' : _PONG,
+  '__module__' : 'devicetocentral_pb2'
+  # @@protoc_insertion_point(class_scope:Pong)
+  })
+_sym_db.RegisterMessage(Pong)
+
 
 
 _DEVICETOCENTRAL = _descriptor.ServiceDescriptor(
@@ -129,8 +244,8 @@ _DEVICETOCENTRAL = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=109,
-  serialized_end=174,
+  serialized_start=238,
+  serialized_end=332,
   methods=[
   _descriptor.MethodDescriptor(
     name='RegisterToCentral',
@@ -139,6 +254,16 @@ _DEVICETOCENTRAL = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_DEVICEINFO,
     output_type=_REGSTATUS,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='HeartBeat',
+    full_name='DeviceToCentral.HeartBeat',
+    index=1,
+    containing_service=None,
+    input_type=_PING,
+    output_type=_PONG,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

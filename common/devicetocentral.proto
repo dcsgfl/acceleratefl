@@ -2,14 +2,28 @@ syntax = "proto3";
 
 service DeviceToCentral {
     rpc RegisterToCentral(DeviceInfo) returns (RegStatus) {}
+    rpc HeartBeat(Ping) returns (Pong) {}
 }
 
 message DeviceInfo {
     string ip = 1;
-    string flport = 2;
-    string id = 3;
+    int32 flport = 2;
 }
 
 message RegStatus {
     bool success = 1;
+    string id = 2;
+}
+
+message Ping {
+    float cpu_usage = 1;
+    int32 ncpus = 2;
+    float load15 = 3;
+    float virtual_mem = 4;
+    float battery = 5;
+    string id = 6;
+}
+
+message Pong {
+    bool ack = 1;
 }

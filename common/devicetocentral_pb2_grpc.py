@@ -19,12 +19,23 @@ class DeviceToCentralStub(object):
                 request_serializer=devicetocentral__pb2.DeviceInfo.SerializeToString,
                 response_deserializer=devicetocentral__pb2.RegStatus.FromString,
                 )
+        self.HeartBeat = channel.unary_unary(
+                '/DeviceToCentral/HeartBeat',
+                request_serializer=devicetocentral__pb2.Ping.SerializeToString,
+                response_deserializer=devicetocentral__pb2.Pong.FromString,
+                )
 
 
 class DeviceToCentralServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def RegisterToCentral(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def HeartBeat(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -37,6 +48,11 @@ def add_DeviceToCentralServicer_to_server(servicer, server):
                     servicer.RegisterToCentral,
                     request_deserializer=devicetocentral__pb2.DeviceInfo.FromString,
                     response_serializer=devicetocentral__pb2.RegStatus.SerializeToString,
+            ),
+            'HeartBeat': grpc.unary_unary_rpc_method_handler(
+                    servicer.HeartBeat,
+                    request_deserializer=devicetocentral__pb2.Ping.FromString,
+                    response_serializer=devicetocentral__pb2.Pong.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -62,5 +78,22 @@ class DeviceToCentral(object):
         return grpc.experimental.unary_unary(request, target, '/DeviceToCentral/RegisterToCentral',
             devicetocentral__pb2.DeviceInfo.SerializeToString,
             devicetocentral__pb2.RegStatus.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def HeartBeat(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/DeviceToCentral/HeartBeat',
+            devicetocentral__pb2.Ping.SerializeToString,
+            devicetocentral__pb2.Pong.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
