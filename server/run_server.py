@@ -11,6 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import syft as sy
+from syft.frameworks.torch.fl import utils
 from syft.workers import websocket_client
 from syft.workers.websocket_client import WebsocketClientWorker
 
@@ -89,7 +90,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
 def loss_fn(pred, target):
     return F.nll_loss(input=pred, target=target)
 
-async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, lr, dataset):
+def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, lr, dataset):
     """
     Send the model to the worker and fit the model on the worker's training data.
 
@@ -117,85 +118,38 @@ async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, 
         optimizer="SGD",
         optimizer_args={"lr": lr},
     )
-    start_time = time.time()    # TODO(optional): seperate time spent on async_fit() and network communication
+
     train_config.send(worker)
-    loss = await worker.async_fit(dataset_key=dataset, return_ids=[0])      # TODO: add deadline here
+    loss = worker.async_fit(dataset_key=dataset, return_ids=[0])      # TODO: add deadline here
     model = train_config.model_ptr.get().obj
-    end_time = time.time()
-    duration = end_time - start_time
-    return worker.id, model, loss, duration
+    
+    return worker.id, model, loss
 
-# async def train_and_eval(worker_instances, args):
-#     use_cuda = args.cuda and torch.cuda.is_available()
-#     torch.manual_seed(args.seed)
-#     device = torch.device("cpu")
-#     model = mdlftry.getModel(args.model).to(device)
-#     traced_model = torch.jit.trace(model, torch.zeros([1, 3, 32, 32], dtype=torch.float).to(device))
-#     learning_rate = args.lr
-#     dataset = args.dataset
+def evaluate_model_on_worker(model_identifier, worker, dataset_key, model, nr_bins, batch_size, device, print_target_hist=False):
+    model.eval()
 
-#     for curr_round in range(1, args.epochs + 1):
-#         perf_metrics = recv_perf_metrics(client_list)    #{dev_id: dev_cpu_util}
-#         selected_worker_instances = scheduler.rand_scheduler(curr_round, worker_instances, 10)
-        
-#         results = await asyncio.gather(
-#             *[
-#                 fit_model_on_worker(worker, traced_model, 128, args.fedepoch, learning_rate, dataset)
-#                 for _wi, worker in enumerate(selected_worker_instances) #if batch_size_list[worker.id]>0
-#             ]
-#         )
+    # Create and send train config
+    train_config = sy.TrainConfig(batch_size=batch_size, model=model, loss_fn=loss_fn, optimizer_args=None, epochs=1)
 
-#         models = {}
-#         loss_values = {}
+    train_config.send(worker)
 
-#         test_models = curr_round % 10 == 1 or curr_round == args.training_rounds
+    result = worker.evaluate(dataset_key=dataset_key, return_histograms=True, nr_bins=nr_bins, return_loss=True, return_raw_accuracy=True)
+    test_loss = result["loss"]
+    correct = result["nr_correct_predictions"]
+    len_dataset = result["nr_predictions"]
+    hist_pred = result["histogram_predictions"]
+    hist_target = result["histogram_target"]
 
-#         max_duration=0
-#         # Federate models (note that this will also change the model in models[0]
-#         for worker_id, worker_model, worker_loss, duration in results:    # training loss
-#             if worker_model is not None:
-#                 models[worker_id] = worker_model
-#                 loss_values[worker_id] = worker_loss
-#                 print(worker_id, duration)
-#                 max_duration=max(max_duration, duration)
-#                 #if(isstd[worker_id]==True):        # use standard batch size this time -> get dev perf profile
-#                 dev_profile[worker_id]=duration
-
-#         print('duration of round ', curr_round, '==', max_duration+schend_time-schstart_time)
-#         traced_model = utils.federated_avg(models)
-
-#         test_models=True    # eval after every round
-#         sum_acc=0.00
-#         if test_models:
-#             # evaluate_model_locally(traced_model)
-#             for worker in worker_instances:
-#                 test_loss, test_acc=evaluate_model_on_worker(        # test accuracy
-#                     model_identifier="Federated model",
-#                     worker=worker,
-#                     dataset_key=dataset + "TEST",
-#                     model=traced_model,
-#                     nr_bins=10,
-#                     batch_size=128,
-#                     device="cpu",
-#                     print_target_hist=False,
-#                 )
-#                 evalres[worker.id] = test_acc
-#                 evalloss[worker.id] = test_loss
-#                 sum_acc+=test_acc
-#             sum_acc=sum_acc/len(worker_instances)
-#             print("AVG ACCURACY: ",sum_acc)
-
-#         # decay learning rate
-#         learning_rate = max(0.98 * learning_rate, args.lr * 0.01)
-
-#     if args.save_model:
-#         torch.save(model.state_dict(), "mnist_cnn.pt")
+    if print_target_hist:
+        print("Target histogram: ", hist_target)
+    print(worker.id, "Average loss: ",test_loss,", Accuracy: ",100.0 * correct / len_dataset, ", total: ", len_dataset, "correct: ", correct)
+    return(correct, len_dataset)
 
 def set_worker_conn(hook, available_devices, verbose):
     worker_instances = {}
-    for devid in available_devices:
+    for dev in available_devices:
         kwargs_websocket = {'host' : dev['ip'], 'hook' : hook, 'verbose' : verbose}
-        clientWorker = WebsocketClientWorker(id = devid, port = dev['flport'], **kwargs_websocket)
+        clientWorker = WebsocketClientWorker(id = dev['id'], port = dev['flport'], **kwargs_websocket)
         clientWorker.clear_objects_remote()
         worker_instances.append(clientWorker)
     
@@ -217,6 +171,9 @@ def train_and_eval(args, devcentral, client_threshold, verbose):
     dataset = args.dataset
     batch_size = 128
 
+    evalres={}
+    evalloss={}
+    
     for curr_round in range(0, args.epochs):
         devcentral.lock.acquire()
         temp_instances = copy.deepcopy(devcentral.available_devices)
@@ -229,6 +186,47 @@ def train_and_eval(args, devcentral, client_threshold, verbose):
         results = {}
         for worker in worker_instances:
             results[worker['id']] = fit_model_on_worker(worker, traced_model, batch_size, max_fed_epoch, learning_rate, dataset)
+
+        models = {}
+        loss_values = {}
+
+        test_models = curr_round % 10 == 1 or curr_round == args.training_rounds
+
+        max_duration=0
+        # Federate models (note that this will also change the model in models[0]
+        for worker_id, worker_model, worker_loss, duration in results:    # training loss
+            if worker_model is not None:
+                models[worker_id] = worker_model
+                loss_values[worker_id] = worker_loss
+
+        traced_model = utils.federated_avg(models)
+
+        test_models=True    # eval after every round
+        sum_acc=0.00
+        if test_models:
+            # evaluate_model_locally(traced_model)
+            for worker in worker_instances:
+                test_loss, test_acc=evaluate_model_on_worker(        # test accuracy
+                    model_identifier="Federated model",
+                    worker=worker,
+                    dataset_key=dataset + "TEST",
+                    model=traced_model,
+                    nr_bins=10,
+                    batch_size=128,
+                    device="cpu",
+                    print_target_hist=False,
+                )
+                evalres[worker.id] = test_acc
+                evalloss[worker.id] = test_loss
+                sum_acc+=test_acc
+            sum_acc=sum_acc/len(worker_instances)
+            print("AVG ACCURACY: ",sum_acc)
+
+        # decay learning rate
+        learning_rate = max(0.98 * learning_rate, args.lr * 0.01)
+
+    if args.save_model:
+        torch.save(model.state_dict(), "mnist_cnn.pt")
 
 def grpcServe(devcentral):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
