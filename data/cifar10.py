@@ -59,7 +59,7 @@ class CIFAR10(Dataset):
                 imgbin[iter * fsize : (iter + 1) * fsize] = np.frombuffer(binHandle.read(), dtype='B')
         
         # remove the cifar10 directory after use
-        shutil.rmtree(self.path)
+        # shutil.rmtree(self.path)
 
         # 1 image : 3073 bytes [1(label):32*32*3(rbg)]
         labels = imgbin[::3073]
@@ -79,13 +79,29 @@ class CIFAR10(Dataset):
         self.train_x, self.train_y = img[:50000], labels[:50000]
         self.test_x, self.test_y = img[50000:], labels[50000:]
 
+        # get unique label count
+        self.unique_labels = list(np.unique(self.train_y))
+        self.n_unique_labels = len(self.unique_labels)
+        self.min_label = min(self.unique_labels)
+        self.max_label = max(self.unique_labels)
+
+        # list of list: for both train and test
+        #           inner list: indices corresponding to a specific label
+        #           outer list: unique labels
+        self.indices_train = [[] for x in range(self.n_unique_labels)]
+        self.indices_test = [[] for x in range(self.n_unique_labels)]
+        for i in range(self.n_unique_labels):
+            self.indices_train[i] = np.isin(self.train_y, [i])
+        for i in range(self.n_unique_labels):
+            self.indices_test[i] = np.isin(self.test_y, [i])
+
         return True
 
-    def get_training_data(self):
-        raise NotImplementedError("ERROR: get_training_data unimplemented")
+    def get_training_data(self, id):
+        return super().get_training_data(id)
     
-    def get_testing_data(self):
-        raise NotImplementedError("ERROR: get_testing_data unimplemented")
+    def get_testing_data(self, id):
+        return super().get_testing_data(id)
 
 
 if __name__ == '__main__':
