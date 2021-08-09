@@ -155,17 +155,18 @@ def set_worker_conn(hook, available_devices, verbose):
     
     return worker_instances
 
-def schedule_best_worker_instances(available_clients, client_threshold=10, sched_type='PYSched'):
+def schedule_best_worker_instances(available_clients, client_threshold=10, sched_type='RNDSched'):
     scheduler = schedftry.getScheduler(sched_type)
     return scheduler.select_worker_instances(available_clients, client_threshold)
 
 
 def train_and_eval(args, devcentral, client_threshold, verbose):
-    use_cuda = args.cuda and torch.cuda.is_available()
+   
     torch.manual_seed(args.seed)
     device = torch.device("cpu")
     model = mdlftry.getModel(args.model).to(device)
     traced_model = torch.jit.trace(model, torch.zeros([1, 3, 32, 32], dtype=torch.float).to(device))
+   
     max_fed_epoch = args.fedepoch
     learning_rate = args.lr
     dataset = args.dataset
@@ -173,7 +174,7 @@ def train_and_eval(args, devcentral, client_threshold, verbose):
 
     evalres={}
     evalloss={}
-    
+
     for curr_round in range(0, args.epochs):
         devcentral.lock.acquire()
         temp_instances = copy.deepcopy(devcentral.available_devices)
@@ -185,7 +186,7 @@ def train_and_eval(args, devcentral, client_threshold, verbose):
 
         results = {}
         for worker in worker_instances:
-            results[worker['id']] = fit_model_on_worker(worker, traced_model, batch_size, max_fed_epoch, learning_rate, dataset)
+            results[worker.id] = fit_model_on_worker(worker, traced_model, batch_size, max_fed_epoch, learning_rate, dataset)
 
         models = {}
         loss_values = {}
@@ -224,9 +225,6 @@ def train_and_eval(args, devcentral, client_threshold, verbose):
 
         # decay learning rate
         learning_rate = max(0.98 * learning_rate, args.lr * 0.01)
-
-    if args.save_model:
-        torch.save(model.state_dict(), "mnist_cnn.pt")
 
 def grpcServe(devcentral):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
@@ -295,15 +293,18 @@ if __name__ == '__main__':
 
     args = parse_arguments()
 
+    # logging format
     logging.basicConfig(
         format='%(asctime)s %(levelname)-8s %(message)s',
         level=logging.INFO,
         datefmt='%Y-%m-%d %H:%M:%S')
     devcentral = DeviceToCentralServicer()
     
+    #  grpc service for register, heartbeat
     grpcservice = threading.Thread(target=grpcServe, args=(devcentral, ))
     grpcservice.start()
 
+    # train and eval models 
     client_threshold = 10
     train_and_eval(args, devcentral, client_threshold, args.verbose)
 
