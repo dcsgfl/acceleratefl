@@ -3,6 +3,7 @@ syntax = "proto3";
 service DeviceToCentral {
     rpc RegisterToCentral(DeviceInfo) returns (RegStatus) {}
     rpc HeartBeat(Ping) returns (Pong) {}
+    rpc SendSummary(DeviceSummary) returns (SummaryAck) {}
 }
 
 message DeviceInfo {
@@ -25,5 +26,14 @@ message Ping {
 }
 
 message Pong {
+    bool ack = 1;
+}
+
+message DeviceSummary {
+    string id = 1;
+    repeated int32 devicehist = 2;
+}
+
+message SummaryAck {
     bool ack = 1;
 }

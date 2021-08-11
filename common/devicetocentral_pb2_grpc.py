@@ -24,6 +24,11 @@ class DeviceToCentralStub(object):
                 request_serializer=devicetocentral__pb2.Ping.SerializeToString,
                 response_deserializer=devicetocentral__pb2.Pong.FromString,
                 )
+        self.SendSummary = channel.unary_unary(
+                '/DeviceToCentral/SendSummary',
+                request_serializer=devicetocentral__pb2.DeviceSummary.SerializeToString,
+                response_deserializer=devicetocentral__pb2.SummaryAck.FromString,
+                )
 
 
 class DeviceToCentralServicer(object):
@@ -41,6 +46,12 @@ class DeviceToCentralServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SendSummary(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_DeviceToCentralServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -53,6 +64,11 @@ def add_DeviceToCentralServicer_to_server(servicer, server):
                     servicer.HeartBeat,
                     request_deserializer=devicetocentral__pb2.Ping.FromString,
                     response_serializer=devicetocentral__pb2.Pong.SerializeToString,
+            ),
+            'SendSummary': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendSummary,
+                    request_deserializer=devicetocentral__pb2.DeviceSummary.FromString,
+                    response_serializer=devicetocentral__pb2.SummaryAck.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -95,5 +111,22 @@ class DeviceToCentral(object):
         return grpc.experimental.unary_unary(request, target, '/DeviceToCentral/HeartBeat',
             devicetocentral__pb2.Ping.SerializeToString,
             devicetocentral__pb2.Pong.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SendSummary(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/DeviceToCentral/SendSummary',
+            devicetocentral__pb2.DeviceSummary.SerializeToString,
+            devicetocentral__pb2.SummaryAck.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

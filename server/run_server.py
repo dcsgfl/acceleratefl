@@ -84,6 +84,17 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
             ack = True,
         )
 
+    def SendSummary(self, request, context):
+        self.lock.acquire()
+        self.available_devices[request.id]['summary'] = request.devicehist
+        self.lock.release()
+        
+        logging.info('Data summary: ' + str(request.devicehist))
+
+        return devicetocentral_pb2.SummaryAck(
+            ack = True,
+        )
+
  # Loss function
 
 @torch.jit.script
@@ -305,8 +316,8 @@ if __name__ == '__main__':
     grpcservice.start()
 
     # train and eval models 
-    client_threshold = 10
-    train_and_eval(args, devcentral, client_threshold, args.verbose)
+    # client_threshold = 10
+    # train_and_eval(args, devcentral, client_threshold, args.verbose)
 
     grpcservice.join()
     

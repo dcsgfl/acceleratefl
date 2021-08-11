@@ -5,6 +5,7 @@ import torch
 import grpc
 import psutil
 
+import numpy as np
 import syft as sy
 from syft.workers import websocket_server
 from torchvision import transforms
@@ -27,6 +28,8 @@ import devicetocentral_pb2
 import devicetocentral_pb2_grpc
 
 devid = ""
+
+# register device with central server and get device id
 def register_to_central(args):
     with grpc.insecure_channel(args.centralip + ':50051') as channel:
         stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
@@ -48,6 +51,7 @@ def register_to_central(args):
 
     return False
 
+# send device profile every 5 seconds to the central server
 def heartbeat(args):
 
     while(True):
@@ -76,7 +80,32 @@ def heartbeat(args):
                 logging.info('Connection to server failed...')
                 return
 
-def start_websocker_server_worker(id, host, port, dataset, hook, verbose):
+# send summary to the central server at the start
+# TO DO: when to send the summary next?
+def send_summary(args, datacls):
+    tensor_train_x, tensor_train_y = datacls.get_training_data(devid)
+    train_y = tensor_train_y.numpy()
+    histres = np.histogram(train_y, bins = np.arange(datacls.n_unique_labels))
+    summary = histres[0]
+    with grpc.insecure_channel(args.centralip + ':50051') as channel:
+        stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
+        logging.info('Sending summary to central server: ' + args.centralip + ':50051')
+        resp = stub.SendSummary(
+            devicetocentral_pb2.DeviceSummary (
+                id = devid,
+                devicehist = summary
+            )
+        )
+
+        logging.info('Summary sending complete')
+
+        if resp.ack :
+            logging.info(args.host + ':' + str(args.port) + ' sent summary')
+            return True
+
+    return False
+
+def start_websocker_server_worker(id, host, port, dataset, datacls, hook, verbose):
     server = websocket_server.WebsocketServerWorker(
         id = id,
         host = host,
@@ -84,12 +113,8 @@ def start_websocker_server_worker(id, host, port, dataset, hook, verbose):
         hook = hook,
         verbose = verbose)
 
-    # Dataset class selection
-    from datasetFactory import DatasetFactory as dftry
-    datacls = dftry.getDataset(dataset)
-
     # Training data
-    train_data, train_targets = datacls.get_training_data()
+    train_data, train_targets = datacls.get_training_data(id)
     dataset_train = sy.BaseDataset(
         data = train_data,
         targets = train_targets,
@@ -98,7 +123,7 @@ def start_websocker_server_worker(id, host, port, dataset, hook, verbose):
     server.add_dataset(dataset_train, key = dataset + '_TRAIN')
 
     # Testing data
-    test_data, test_targets = datacls.get_testing_data()
+    test_data, test_targets = datacls.get_testing_data(id)
     dataset_test = sy.BaseDataset(
         data = test_data,
         targets = test_targets,
@@ -171,24 +196,42 @@ if __name__ == '__main__':
         level=logging.INFO,
         datefmt='%Y-%m-%d %H:%M:%S')
 
+    # set dataset class
+    from datasetFactory import DatasetFactory as dftry
+    datacls = dftry.getDataset(dataset)
+
+    # Training data
+    _, _ = datacls.get_training_data(id)
+    _, _ = datacls.get_testing_data(id)
+
     # grpc call to central server to register
     stat = register_to_central(args)
     if not stat:
         print('Registration to central failed...')
         sys.exit()
+
+    # grpc call to send summary to central server
+    stat = send_summary(args, datacls)
+    if not stat:
+        print('Sending data summary failed')
+        sys.exit()
     
+    # heatbeat to central server
     heartbeat_service = threading.Thread(target=heartbeat, args=(args, ))
     heartbeat_service.start()
-    heartbeat_service.join()
 
     # Hook PyTorch to add extra functionalities to support FL
     # hook = sy.TorchHook(torch)
 
+    # start server to receive model and train/test from central server
     # server = start_websocker_server_worker(
-    #     id = args.id,
+    #     id = devid,
     #     host = args.host,
     #     port = args.port,
     #     dataset = args.dataset,
+    #     datacls = datacls,
     #     hook = hook,
     #     verbose = args.verbose
     # )
+
+    heartbeat_service.join()
