@@ -23,7 +23,7 @@ class Dataset:
         my_label = random.randint(self.min_label, self.max_label)
 
         # remove my lable from available ones for adding noise
-        noise_labels = self.unique_labels
+        noise_labels = self.unique_labels.copy()
         noise_labels.remove(my_label)
 
         # For maintaining same distribution across train and test, same noise percent should be added

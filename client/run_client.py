@@ -85,7 +85,7 @@ def heartbeat(args):
 def send_summary(args, datacls):
     tensor_train_x, tensor_train_y = datacls.get_training_data(devid)
     train_y = tensor_train_y.numpy()
-    histres = np.histogram(train_y, bins = np.arange(datacls.n_unique_labels))
+    histres = np.histogram(train_y, bins = np.arange(datacls.n_unique_labels + 1))
     summary = histres[0]
     with grpc.insecure_channel(args.centralip + ':50051') as channel:
         stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
@@ -196,19 +196,20 @@ if __name__ == '__main__':
         level=logging.INFO,
         datefmt='%Y-%m-%d %H:%M:%S')
 
-    # set dataset class
-    from datasetFactory import DatasetFactory as dftry
-    datacls = dftry.getDataset(dataset)
-
-    # Training data
-    _, _ = datacls.get_training_data(id)
-    _, _ = datacls.get_testing_data(id)
-
     # grpc call to central server to register
     stat = register_to_central(args)
     if not stat:
         print('Registration to central failed...')
         sys.exit()
+    
+    # set dataset class
+    from datasetFactory import DatasetFactory as dftry
+    datacls = dftry.getDataset(args.dataset)
+
+    # Training/Testing data
+    datacls.download_data()
+    _, _ = datacls.get_training_data(devid)
+    _, _ = datacls.get_testing_data(devid)
 
     # grpc call to send summary to central server
     stat = send_summary(args, datacls)

@@ -24,6 +24,7 @@ class CIFAR10(Dataset):
                         'cifar-10-batches-bin/data_batch_4.bin',
                         'cifar-10-batches-bin/data_batch_5.bin',
                         'cifar-10-batches-bin/test_batch.bin']
+                        
     class Factory:
         def get(self):
             return CIFAR10()
