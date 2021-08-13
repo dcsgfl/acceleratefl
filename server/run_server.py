@@ -23,6 +23,10 @@ import logging
 pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'common')
 sys.path.append(pwd)
 
+# Add summary folder to path
+pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'common', 'summary')
+sys.path.append(pwd)
+
 # Add models folder path
 pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'models')
 sys.path.append(pwd)
@@ -37,6 +41,7 @@ import devicetocentral_pb2_grpc
 from utilities import Utility as util
 from modelFactory import ModelFactory as mdlftry
 from schedulerFactory import SchedulerFactory as schedftry
+from hist import HistSummary
 
 class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     
@@ -86,11 +91,10 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
 
     def SendSummary(self, request, context):
         self.lock.acquire()
-        self.available_devices[request.id]['summary'] = request.devicehist
-        self.available_devices[request.id]['labels'] = request.devicelabels
+        self.available_devices[request.id]['summary'] = request.summary
         self.lock.release()
         
-        logging.info('Data summary: ' + str(request.devicehist))
+        logging.info('Data summary: ' + str(request.summary))
 
         return devicetocentral_pb2.SummaryAck(
             ack = True,

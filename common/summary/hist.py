@@ -36,6 +36,9 @@ class HistSummary(object):
                 # Just say there is one so Jaccard Similarity can use it
                 self.values[k] = 1
 
+    def getKeys(self):
+        return set(self.values.keys())
+
     def computeJaccardSimilarity(self, hist2):
 
         if not isinstance(hist2, HistSummary):

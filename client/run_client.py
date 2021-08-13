@@ -23,9 +23,15 @@ sys.path.append(pwd)
 pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'common')
 sys.path.append(pwd)
 
+# Add summary folder to path
+pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'common', 'summary')
+sys.path.append(pwd)
+
 from utilities import Utility as util
 import devicetocentral_pb2
 import devicetocentral_pb2_grpc
+
+from hist import HistSummary
 
 devid = ""
 
@@ -44,7 +50,7 @@ def register_to_central(args):
         logging.info('Registration complete')
 
         if resp.success :
-            logging.info(args.host + ':' + str(args.port) + ' registered with id' + resp.id + '...')
+            logging.info(args.host + ':' + str(args.port) + ' registered with id ' + resp.id + '...')
             global devid
             devid = resp.id
             return True
@@ -83,19 +89,22 @@ def heartbeat(args):
 # send summary to the central server at the start
 # TO DO: when to send the summary next?
 def send_summary(args, datacls):
+
     tensor_train_x, tensor_train_y = datacls.get_training_data(devid)
     train_y = tensor_train_y.numpy()
-    histres = np.histogram(train_y, bins = np.arange(datacls.n_unique_labels + 1))
-    labels = datacls.unique_labels
-    summary = histres[0]
+    histInput = list(map(str, train_y.tolist()))
+    histSummary = HistSummary(histInput)
+
+    #histres = np.histogram(train_y, bins = np.arange(datacls.n_unique_labels + 1))
+    #labels = datacls.unique_labels
+    #summary = histres[0]
     with grpc.insecure_channel(args.centralip + ':50051') as channel:
         stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
         logging.info('Sending summary to central server: ' + args.centralip + ':50051')
         resp = stub.SendSummary(
             devicetocentral_pb2.DeviceSummary (
                 id = devid,
-                devicehist = summary,
-                devicelabels = labels
+                summary = histSummary.toJson(),
             )
         )
 
