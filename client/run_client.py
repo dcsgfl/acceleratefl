@@ -224,17 +224,17 @@ if __name__ == '__main__':
     heartbeat_service.start()
 
     # Hook PyTorch to add extra functionalities to support FL
-    hook = sy.TorchHook(torch)
+    # hook = sy.TorchHook(torch)
 
     # start server to receive model and train/test from central server
-    server = start_websocker_server_worker(
-        id = devid,
-        host = args.host,
-        port = args.port,
-        dataset = args.dataset,
-        datacls = datacls,
-        hook = hook,
-        verbose = args.verbose
-    )
+    # server = start_websocker_server_worker(
+    #     id = devid,
+    #     host = args.host,
+    #     port = args.port,
+    #     dataset = args.dataset,
+    #     datacls = datacls,
+    #     hook = hook,
+    #     verbose = args.verbose
+    # )
 
     heartbeat_service.join()

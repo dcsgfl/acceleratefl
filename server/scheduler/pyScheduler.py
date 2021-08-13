@@ -24,6 +24,14 @@ class PYSched:
             
         dev_clusters = cluster_hist(device_summaries, keyspace)
 
+        for device in available_devices:
+            
+        available_devices[request.id]['cpu_usage']
+        available_devices[request.id]['ncpus']
+        available_devices[request.id]['load']
+        available_devices[request.id]['virtual_mem']
+        available_devices[request.id]['battery']
+
 
         #     if(dev.id in selected_devid):
         #         res.append(dev)
