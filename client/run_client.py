@@ -86,6 +86,7 @@ def send_summary(args, datacls):
     tensor_train_x, tensor_train_y = datacls.get_training_data(devid)
     train_y = tensor_train_y.numpy()
     histres = np.histogram(train_y, bins = np.arange(datacls.n_unique_labels + 1))
+    labels = datacls.unique_labels
     summary = histres[0]
     with grpc.insecure_channel(args.centralip + ':50051') as channel:
         stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
@@ -93,7 +94,8 @@ def send_summary(args, datacls):
         resp = stub.SendSummary(
             devicetocentral_pb2.DeviceSummary (
                 id = devid,
-                devicehist = summary
+                devicehist = summary,
+                devicelabels = labels
             )
         )
 
@@ -222,17 +224,17 @@ if __name__ == '__main__':
     heartbeat_service.start()
 
     # Hook PyTorch to add extra functionalities to support FL
-    # hook = sy.TorchHook(torch)
+    hook = sy.TorchHook(torch)
 
     # start server to receive model and train/test from central server
-    # server = start_websocker_server_worker(
-    #     id = devid,
-    #     host = args.host,
-    #     port = args.port,
-    #     dataset = args.dataset,
-    #     datacls = datacls,
-    #     hook = hook,
-    #     verbose = args.verbose
-    # )
+    server = start_websocker_server_worker(
+        id = devid,
+        host = args.host,
+        port = args.port,
+        dataset = args.dataset,
+        datacls = datacls,
+        hook = hook,
+        verbose = args.verbose
+    )
 
     heartbeat_service.join()

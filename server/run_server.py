@@ -87,6 +87,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     def SendSummary(self, request, context):
         self.lock.acquire()
         self.available_devices[request.id]['summary'] = request.devicehist
+        self.available_devices[request.id]['labels'] = request.devicelabels
         self.lock.release()
         
         logging.info('Data summary: ' + str(request.devicehist))
@@ -190,7 +191,7 @@ def train_and_eval(args, devcentral, client_threshold, verbose):
         devcentral.lock.acquire()
         temp_instances = copy.deepcopy(devcentral.available_devices)
         devcentral.lock.release()
-        selected_worker_instances = schedule_best_worker_instances(temp_instances, client_threshold)
+        selected_worker_instances = schedule_best_worker_instances(temp_instances, client_threshold, args.scheduler)
         
         hook = sy.TorchHook(torch)
         worker_instances = set_worker_conn(hook, selected_worker_instances, verbose)
@@ -268,6 +269,13 @@ def parse_arguments(args = sys.argv[1:]):
         type = float,
         default = 0.1,
         help = 'learning rate',
+    )
+
+    parser.add_argument(
+        '--scheduler',
+        type = str,
+        default = 'RNDSched',
+        help = 'Scheduler type',
     )
 
     parser.add_argument(

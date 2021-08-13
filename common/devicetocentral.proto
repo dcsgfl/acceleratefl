@@ -32,6 +32,7 @@ message Pong {
 message DeviceSummary {
     string id = 1;
     repeated int32 devicehist = 2;
+    repeated string devicelabels = 3;
 }
 
 message SummaryAck {
