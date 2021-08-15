@@ -17,7 +17,7 @@ class HistSummary(object):
                     A histogram will be constructed by counting the
                     instances of each label in the list.
     """
-    def __init__(self, labels):
+    def __init__(self, labels=[]):
 
         if not isinstance(labels, list):
             raise ValueError("Labels must be a list")
