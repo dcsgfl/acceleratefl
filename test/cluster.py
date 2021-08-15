@@ -58,4 +58,3 @@ hlist = [h01, h11, h21, h31, h41, h51, h61, h71, h81, h91,
          h02, h12, h22, h32, h42, h52, h62, h72, h82, h92]
 
 classes = cluster_hist(hlist, ks)
-print classes

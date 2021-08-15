@@ -18,17 +18,17 @@ class PYSched:
         summaries = []
         keyspace = set([])
 
+        # unpack histogram infor and create a list
         for device in available_devices:
             histSummary = HistSummary()
             histSummary.fromJson(device['summary'])
             summaries.append(histSummary)
             keyspace.union(histSummary.getKeys())
-            
+        
+        # identify cluster of each device
         dev_clusters = cluster_hist(summaries, list(keyspace))
-        print str(dev_clusters)
-
         for idx, device in enumerate(available_devices):
-            device['cluster'] = dev_clusters[idx]   
+            device['cluster'] = dev_clusters[idx]
 
         return available_devices
         #available_devices[request.id]['cpu_usage']
