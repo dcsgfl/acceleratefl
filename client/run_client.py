@@ -95,9 +95,6 @@ def send_summary(args, datacls):
     histInput = list(map(str, train_y.tolist()))
     histSummary = HistSummary(histInput)
 
-    #histres = np.histogram(train_y, bins = np.arange(datacls.n_unique_labels + 1))
-    #labels = datacls.unique_labels
-    #summary = histres[0]
     with grpc.insecure_channel(args.centralip + ':50051') as channel:
         stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
         logging.info('Sending summary to central server: ' + args.centralip + ':50051')
