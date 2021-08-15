@@ -21,19 +21,6 @@ class PYSched:
         summaries = []
         keyspace = set([])
 
-<<<<<<< HEAD
-        # unpack histogram infor and create a list
-        for device in available_devices:
-            histSummary = HistSummary()
-            histSummary.fromJson(device['summary'])
-            summaries.append(histSummary)
-            keyspace.union(histSummary.getKeys())
-        
-        # identify cluster of each device
-        dev_clusters = cluster_hist(summaries, list(keyspace))
-        for idx, device in enumerate(available_devices):
-            device['cluster'] = dev_clusters[idx]
-=======
         # We need a deterministic ordering of keys
         dev_keys = copy.deepcopy(list(available_devices.keys()))
 
@@ -73,7 +60,6 @@ class PYSched:
                 #available_devices[request.id]['load']
                 #available_devices[request.id]['virtual_mem']
                 #available_devices[request.id]['battery']
->>>>>>> f1a9900c41df3d64bc77c5f1ef6def5d3ce48c58
 
             selected_devices[bestDev["id"]] = bestDev
 
