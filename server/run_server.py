@@ -48,6 +48,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     def __init__(self):
         super().__init__()
         self.available_devices = {}
+        self.n_available_devices = 0
         self.lock = threading.Lock()
         
     def RegisterToCentral(self, request, context):
@@ -60,6 +61,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
             self.available_devices[id]['id'] = id
             self.available_devices[id]['ip'] = request.ip
             self.available_devices[id]['flport'] = request.flport
+            self.n_available_devices += 1
         self.lock.release()
 
         logging.info('Registered client ' + request.ip + ':' + str(request.flport) + '...')
@@ -163,9 +165,10 @@ def evaluate_model_on_worker(model_identifier, worker, dataset_key, model, nr_bi
 
 def set_worker_conn(hook, available_devices, verbose):
     worker_instances = {}
-    for dev in available_devices:
-        kwargs_websocket = {'host' : dev['ip'], 'hook' : hook, 'verbose' : verbose}
-        clientWorker = WebsocketClientWorker(id = dev['id'], port = dev['flport'], **kwargs_websocket)
+    print(available_devices)
+    for devid in available_devices:
+        kwargs_websocket = {'host' : available_devices[devid]['ip'], 'hook' : hook, 'verbose' : verbose}
+        clientWorker = WebsocketClientWorker(id = devid, port = available_devices[devid]['flport'], **kwargs_websocket)
         clientWorker.clear_objects_remote()
         worker_instances.append(clientWorker)
     
@@ -191,6 +194,14 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
     evalres={}
     evalloss={}
 
+    while True:
+        devcentral.lock.acquire()
+        if devcentral.n_available_devices < client_threshold:
+            devcentral.lock.release()
+        else:
+            devcentral.lock.release()
+            break
+
     for curr_round in range(0, args.epochs):
         devcentral.lock.acquire()
         temp_instances = copy.deepcopy(devcentral.available_devices)
@@ -205,8 +216,8 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                 fit_model_on_worker(
                     worker=worker,
                     traced_model=traced_model,
-                    batch_size=128,    # batch_size_list[worker.id],
-                    max_nr_batches=args.federate_after_n_batches,
+                    batch_size=batch_size,    # batch_size_list[worker.id],
+                    max_nr_batches=max_fed_epoch,
                     lr=learning_rate,
                     dataset= dataset
                 )
@@ -280,8 +291,15 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--dataset',
         type = str,
-        default='MNIST',
+        default='CIFAR10',
         help = 'Dataset used',
+    )
+
+    parser.add_argument(
+        '--model',
+        type = str,
+        default='LeNet',
+        help = 'Model used',
     )
 
     parser.add_argument(
@@ -344,8 +362,10 @@ if __name__ == '__main__':
     grpcservice.start()
 
     # train and eval models 
-    client_threshold = 10
-    train_and_eval(args, devcentral, client_threshold, args.verbose)
+    client_threshold = 3
+    asyncio.get_event_loop().run_until_complete(
+        train_and_eval(args, devcentral, client_threshold, args.verbose)
+    )
 
     grpcservice.join()
     

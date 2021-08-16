@@ -4,9 +4,12 @@ class RNDSched:
     def __init__(self):
         pass
 
-    def select_worker_instances(self, client_list, client_threshold):
-        selected_client_list = random.sample(client_list, client_threshold)  # select num_of_selected dev for each round
-        return(selected_client_list)
+    def select_worker_instances(self, available_devices, client_threshold):
+        selected_devices = {}
+        device_keys = random.sample(list(available_devices.keys()), client_threshold)
+        for key in device_keys:
+            selected_devices[key] = available_devices[key].copy()
+        return(selected_devices)
     
     class Factory:
         def get(self):

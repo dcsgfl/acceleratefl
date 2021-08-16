@@ -1,20 +1,21 @@
-import AlexNet
-import DenseNet
-import GoogleNet
-import LeNet
-import ResNet
-import VGG
-import WideResNet
+from AlexNet import AlexNet
+from DenseNet import DenseNet
+from GoogleNet import GoogleNet
+from LeNet import LeNet
+from ResNet import ResNet
+from VGG import VGG
+from WideResNet import WideResNet
 
 class ModelFactory:
     factories = {}
     
-    def addFactory(id, dftory):
-        ModelFactory.factories.put[id] = dftory
+    def addFactory(id, mftory):
+        ModelFactory.factories.put[id] = mftory
     addFactory = staticmethod(addFactory)
     
     def getModel(id):
         if id not in ModelFactory.factories:
+            print(id)
             ModelFactory.factories[id] = eval(id + '.Factory()')
 
         return ModelFactory.factories[id].get()
