@@ -278,6 +278,13 @@ def parse_arguments(args = sys.argv[1:]):
     )
 
     parser.add_argument(
+        '--dataset',
+        type = str,
+        default='MNIST',
+        help = 'Dataset used',
+    )
+
+    parser.add_argument(
         '--lr',
         type = float,
         default = 0.1,
