@@ -177,14 +177,12 @@ def set_worker_conn(hook, available_devices, previous_worker_instances, verbose)
                 clientWorker.clear_objects_remote()
                 worker_instances.append(clientWorker)
                 previous_worker_instances[devid] = clientWorker
-                print('Chkpt1')
         else:
             kwargs_websocket = {'host' : available_devices[devid]['ip'], 'hook' : hook, 'verbose' : verbose}
             clientWorker = WebsocketClientWorker(id = devid, port = available_devices[devid]['flport'], **kwargs_websocket)
             clientWorker.clear_objects_remote()
             worker_instances.append(clientWorker)
             previous_worker_instances[devid] = clientWorker
-            print('Chkpt2')
         
     
     return worker_instances
@@ -226,11 +224,13 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                 break
             else:
                 devcentral.lock.release()
-
+        schedule_start_time = time.time()
         selected_worker_instances = schedule_best_worker_instances(temp_instances, client_threshold, args.scheduler)
-        
+        schedule_end_time = time.time()
+
         worker_instances = set_worker_conn(hook, selected_worker_instances, previous_worker_instances, verbose)
 
+        train_start_time = time.time()
         results = await asyncio.gather(
             *[
                 fit_model_on_worker(
@@ -244,6 +244,8 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                 for _wi, worker in enumerate(worker_instances) #if batch_size_list[worker.id]>0
             ]
         )
+
+        train_end_time = time.time()
 
         models = {}
         loss_values = {}
@@ -272,11 +274,11 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                     nr_bins=10,
                     batch_size=128,
                     device="cpu",
-                    print_target_hist=True,
+                    print_target_hist=False,
                 )
                 _correct+=correct
                 _total+=total
-            print("AVG ACCURACY: ",_correct/_total)
+            print("EPOCH:", curr_round, " AVG_ACCURACY: ",_correct/_total, "TIME: ", schedule_end_time - schedule_start_time + train_end_time - train_start_time)
 
         # decay learning rate
         learning_rate = max(0.98 * learning_rate, args.lr * 0.01)
