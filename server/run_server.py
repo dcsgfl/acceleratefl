@@ -106,7 +106,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
 def loss_fn(pred, target):
     return F.nll_loss(input=pred, target=target)
 
-def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, lr, dataset):
+async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, lr, dataset):
     """
     Send the model to the worker and fit the model on the worker's training data.
 
@@ -136,7 +136,7 @@ def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, lr, da
     )
 
     train_config.send(worker)
-    loss = worker.async_fit(dataset_key=dataset, return_ids=[0])      # TODO: add deadline here
+    loss = await worker.async_fit(dataset_key=dataset, return_ids=[0])      # TODO: add deadline here
     model = train_config.model_ptr.get().obj
     
     return worker.id, model, loss
@@ -176,7 +176,7 @@ def schedule_best_worker_instances(available_clients, client_threshold=10, sched
     return scheduler.select_worker_instances(available_clients, client_threshold)
 
 
-def train_and_eval(args, devcentral, client_threshold, verbose):
+async def train_and_eval(args, devcentral, client_threshold, verbose):
    
     torch.manual_seed(args.seed)
     device = torch.device("cpu")
@@ -200,16 +200,25 @@ def train_and_eval(args, devcentral, client_threshold, verbose):
         hook = sy.TorchHook(torch)
         worker_instances = set_worker_conn(hook, selected_worker_instances, verbose)
 
-        results = {}
-        for worker in worker_instances:
-            results[worker.id] = fit_model_on_worker(worker, traced_model, batch_size, max_fed_epoch, learning_rate, dataset)
+        results = await asyncio.gather(
+            *[
+                fit_model_on_worker(
+                    worker=worker,
+                    traced_model=traced_model,
+                    batch_size=128,    # batch_size_list[worker.id],
+                    max_nr_batches=args.federate_after_n_batches,
+                    lr=learning_rate,
+                    dataset= dataset
+                )
+                for _wi, worker in enumerate(worker_instances) #if batch_size_list[worker.id]>0
+            ]
+        )
 
         models = {}
         loss_values = {}
 
         test_models = curr_round % 10 == 1 or curr_round == args.training_rounds
 
-        max_duration=0
         # Federate models (note that this will also change the model in models[0]
         for worker_id, worker_model, worker_loss, duration in results:    # training loss
             if worker_model is not None:
@@ -328,8 +337,8 @@ if __name__ == '__main__':
     grpcservice.start()
 
     # train and eval models 
-    # client_threshold = 10
-    # train_and_eval(args, devcentral, client_threshold, args.verbose)
+    client_threshold = 10
+    train_and_eval(args, devcentral, client_threshold, args.verbose)
 
     grpcservice.join()
     
