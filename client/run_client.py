@@ -171,7 +171,7 @@ def parse_arguments(args = sys.argv[1:]):
         '--dataset',
         '-ds',
         type=str,
-        default='CIFAR10',
+        default='MNIST',
         help='dataset used for the model: --dataset CIFAR10'
     )
 

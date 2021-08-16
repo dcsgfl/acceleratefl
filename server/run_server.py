@@ -199,7 +199,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
     torch.manual_seed(args.seed)
     device = torch.device("cpu")
     model = mdlftry.getModel(args.model).to(device)
-    traced_model = torch.jit.trace(model, torch.zeros([1, 3, 32, 32], dtype=torch.float).to(device))
+    traced_model = torch.jit.trace(model, torch.zeros([1, 1, 28, 28], dtype=torch.float).to(device))
    
     max_fed_epoch = args.fedepoch
     learning_rate = args.lr
@@ -310,7 +310,7 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--dataset',
         type = str,
-        default='CIFAR10',
+        default='MNIST',
         help = 'Dataset used',
     )
 
