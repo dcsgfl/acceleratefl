@@ -49,6 +49,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         super().__init__()
         self.available_devices = {}
         self.n_available_devices = 0
+        self.n_device_summaries = 0
         self.lock = threading.Lock()
         
     def RegisterToCentral(self, request, context):
@@ -80,12 +81,12 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         self.available_devices[request.id]['battery'] = request.battery
         self.lock.release()
 
-        logging.info(request.id + ': [cpu_usage: ' + str(request.cpu_usage) +
-                            ', ncpus: ' + str(request.ncpus) + 
-                            ', load: ' + str(request.load15) +
-                            ', virtual_mem: ' + str(request.virtual_mem) +
-                            ', battery: ' + str(request.battery) +
-                            ']')
+        # logging.info(request.id + ': [cpu_usage: ' + str(request.cpu_usage) +
+        #                     ', ncpus: ' + str(request.ncpus) + 
+        #                     ', load: ' + str(request.load15) +
+        #                     ', virtual_mem: ' + str(request.virtual_mem) +
+        #                     ', battery: ' + str(request.battery) +
+        #                     ']')
 
         return devicetocentral_pb2.Pong(
             ack = True,
@@ -94,6 +95,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     def SendSummary(self, request, context):
         self.lock.acquire()
         self.available_devices[request.id]['summary'] = request.summary
+        self.n_device_summaries += 1
         self.lock.release()
         
         logging.info('Data summary: ' + str(request.summary))
@@ -138,7 +140,7 @@ async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, 
     )
 
     train_config.send(worker)
-    loss = await worker.async_fit(dataset_key=dataset, return_ids=[0])      # TODO: add deadline here
+    loss = await worker.async_fit(dataset_key=dataset + '_TRAIN', return_ids=[0])      # TODO: add deadline here
     model = train_config.model_ptr.get().obj
     
     return worker.id, model, loss
@@ -163,14 +165,27 @@ def evaluate_model_on_worker(model_identifier, worker, dataset_key, model, nr_bi
     print(worker.id, "Average loss: ",test_loss,", Accuracy: ",100.0 * correct / len_dataset, ", total: ", len_dataset, "correct: ", correct)
     return(correct, len_dataset)
 
-def set_worker_conn(hook, available_devices, verbose):
-    worker_instances = {}
-    print(available_devices)
+def set_worker_conn(hook, available_devices, previous_worker_instances, verbose):
+    worker_instances = []
     for devid in available_devices:
-        kwargs_websocket = {'host' : available_devices[devid]['ip'], 'hook' : hook, 'verbose' : verbose}
-        clientWorker = WebsocketClientWorker(id = devid, port = available_devices[devid]['flport'], **kwargs_websocket)
-        clientWorker.clear_objects_remote()
-        worker_instances.append(clientWorker)
+        if previous_worker_instances:
+            if devid in previous_worker_instances.keys():
+                worker_instances.append(previous_worker_instances[devid])
+            else:    
+                kwargs_websocket = {'host' : available_devices[devid]['ip'], 'hook' : hook, 'verbose' : verbose}
+                clientWorker = WebsocketClientWorker(id = devid, port = available_devices[devid]['flport'], **kwargs_websocket)
+                clientWorker.clear_objects_remote()
+                worker_instances.append(clientWorker)
+                previous_worker_instances[devid] = clientWorker
+                print('Chkpt1')
+        else:
+            kwargs_websocket = {'host' : available_devices[devid]['ip'], 'hook' : hook, 'verbose' : verbose}
+            clientWorker = WebsocketClientWorker(id = devid, port = available_devices[devid]['flport'], **kwargs_websocket)
+            clientWorker.clear_objects_remote()
+            worker_instances.append(clientWorker)
+            previous_worker_instances[devid] = clientWorker
+            print('Chkpt2')
+        
     
     return worker_instances
 
@@ -191,9 +206,6 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
     dataset = args.dataset
     batch_size = 128
 
-    evalres={}
-    evalloss={}
-
     while True:
         devcentral.lock.acquire()
         if devcentral.n_available_devices < client_threshold:
@@ -202,14 +214,22 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
             devcentral.lock.release()
             break
 
+    hook = sy.TorchHook(torch)
+    previous_worker_instances = {}
     for curr_round in range(0, args.epochs):
-        devcentral.lock.acquire()
-        temp_instances = copy.deepcopy(devcentral.available_devices)
-        devcentral.lock.release()
+        while True:
+            devcentral.lock.acquire()
+            if devcentral.n_available_devices == devcentral.n_device_summaries:
+                temp_instances = copy.deepcopy(devcentral.available_devices)
+                devcentral.lock.release()
+                time.sleep(3)
+                break
+            else:
+                devcentral.lock.release()
+
         selected_worker_instances = schedule_best_worker_instances(temp_instances, client_threshold, args.scheduler)
         
-        hook = sy.TorchHook(torch)
-        worker_instances = set_worker_conn(hook, selected_worker_instances, verbose)
+        worker_instances = set_worker_conn(hook, selected_worker_instances, previous_worker_instances, verbose)
 
         results = await asyncio.gather(
             *[
@@ -228,10 +248,10 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
         models = {}
         loss_values = {}
 
-        test_models = curr_round % 10 == 1 or curr_round == args.training_rounds
+        # test_models = curr_round % 10 == 1 or curr_round == args.training_rounds
 
         # Federate models (note that this will also change the model in models[0]
-        for worker_id, worker_model, worker_loss, duration in results:    # training loss
+        for worker_id, worker_model, worker_loss in results:    # training loss
             if worker_model is not None:
                 models[worker_id] = worker_model
                 loss_values[worker_id] = worker_loss
@@ -239,25 +259,24 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
         traced_model = utils.federated_avg(models)
 
         test_models=True    # eval after every round
-        sum_acc=0.00
         if test_models:
             # evaluate_model_locally(traced_model)
+            _correct=0
+            _total=0
             for worker in worker_instances:
-                test_loss, test_acc=evaluate_model_on_worker(        # test accuracy
+                correct, total=evaluate_model_on_worker(        # test accuracy
                     model_identifier="Federated model",
                     worker=worker,
-                    dataset_key=dataset + "TEST",
+                    dataset_key=dataset + "_TEST",
                     model=traced_model,
                     nr_bins=10,
                     batch_size=128,
                     device="cpu",
-                    print_target_hist=False,
+                    print_target_hist=True,
                 )
-                evalres[worker.id] = test_acc
-                evalloss[worker.id] = test_loss
-                sum_acc+=test_acc
-            sum_acc=sum_acc/len(worker_instances)
-            print("AVG ACCURACY: ",sum_acc)
+                _correct+=correct
+                _total+=total
+            print("AVG ACCURACY: ",_correct/_total)
 
         # decay learning rate
         learning_rate = max(0.98 * learning_rate, args.lr * 0.01)
