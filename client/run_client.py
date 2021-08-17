@@ -65,6 +65,7 @@ def heartbeat(args):
         load = psutil.os.getloadavg()
         virt_mem = psutil.virtual_memory()
         battery = psutil.sensors_battery()
+        percent = 0.0
         if battery == None:
             percent = 0.0
 
