@@ -58,7 +58,7 @@ def register_to_central(args):
     return False
 
 # send device profile every 5 seconds to the central server
-def heartbeat(args):
+def heartbeat(args, once):
 
     while(True):
         time.sleep(5)
@@ -88,6 +88,8 @@ def heartbeat(args):
             else:
                 logging.info('Connection to server failed...')
                 return
+        if once:
+            break
 
 # send summary to the central server at the start
 # TO DO: when to send the summary next?
@@ -227,9 +229,10 @@ if __name__ == '__main__':
     if not stat:
         print('Sending data summary failed')
         sys.exit()
-    
+   
+    heartbeat(args, True)
     # heatbeat to central server
-    heartbeat_service = threading.Thread(target=heartbeat, args=(args, ))
+    heartbeat_service = threading.Thread(target=heartbeat, args=(args, False, ))
     heartbeat_service.start()
 
     # Hook PyTorch to add extra functionalities to support FL
