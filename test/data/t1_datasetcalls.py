@@ -45,14 +45,14 @@ class TestDataset(unittest.TestCase):
     
     #CIFAR10
     def test_cifar10_download(self):
-        self.skipTest("another method for skipping")
+        # self.skipTest("another method for skipping")
         print("cifar10 download test starting")
         cifar10 = dftry.getDataset('CIFAR10')
         self.assertTrue(cifar10.download_data())
         print("cifar10 download test complete")
     
     def test_cifar10_train(self):
-        self.skipTest("another method for skipping")
+        # self.skipTest("another method for skipping")
         print("cifar10 train")
         cifar10 = dftry.getDataset('CIFAR10')
         self.assertTrue(cifar10.download_data())
@@ -64,7 +64,7 @@ class TestDataset(unittest.TestCase):
         print("cifar10 train complete")
 
     def test_cifar10_test(self):
-        self.skipTest("another method for skipping")
+        # self.skipTest("another method for skipping")
         print("cifar10 test")
         cifar10 = dftry.getDataset('CIFAR10')
         self.assertTrue(cifar10.download_data())

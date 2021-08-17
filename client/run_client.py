@@ -65,6 +65,8 @@ def heartbeat(args):
         load = psutil.os.getloadavg()
         virt_mem = psutil.virtual_memory()
         battery = psutil.sensors_battery()
+        if battery == None:
+            percent = 0.0
 
         with grpc.insecure_channel(args.centralip + ':50051') as channel:
             stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
@@ -75,7 +77,7 @@ def heartbeat(args):
                     ncpus = psutil.cpu_count(),
                     load15 = load[2],
                     virtual_mem = virt_mem.available/(1024*1024*1024),
-                    battery = battery.percent,
+                    battery = percent,
                     id = devid
                 )
             )
