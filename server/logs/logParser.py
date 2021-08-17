@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-file = open("rndscheduler.log")
+file = open("pyscheduler.log")
 
 content = file.readlines()
 
-lineIdx = 3
-lineInc = 4
+lineIdx = 4
+lineInc = 5
 
 nLines = len(content)
 
@@ -22,7 +22,7 @@ while (lineIdx < nLines):
     times.append(float(splitLine[5]))
 
 cumtimes = np.cumsum(times)
-
+print(max(cumtimes))
 x_ticks = np.arange(0, 190, 5)
 y_ticks = np.arange(0, 1, 0.1)
 plt.plot(epoch, accuracy)

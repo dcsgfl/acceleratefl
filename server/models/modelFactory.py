@@ -15,7 +15,6 @@ class ModelFactory:
     
     def getModel(id):
         if id not in ModelFactory.factories:
-            print(id)
             ModelFactory.factories[id] = eval(id + '.Factory()')
 
         return ModelFactory.factories[id].get()
