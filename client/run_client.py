@@ -61,7 +61,8 @@ def register_to_central(args):
 def heartbeat(args, once):
 
     while(True):
-        time.sleep(5)
+        if not once:
+            time.sleep(5)
         load = psutil.os.getloadavg()
         virt_mem = psutil.virtual_memory()
         battery = psutil.sensors_battery()
@@ -224,13 +225,14 @@ if __name__ == '__main__':
     _, _ = datacls.get_training_data(devid)
     _, _ = datacls.get_testing_data(devid)
 
+    heartbeat(args, True)
+    
     # grpc call to send summary to central server
     stat = send_summary(args, datacls)
     if not stat:
         print('Sending data summary failed')
         sys.exit()
    
-    heartbeat(args, True)
     # heatbeat to central server
     heartbeat_service = threading.Thread(target=heartbeat, args=(args, False, ))
     heartbeat_service.start()
