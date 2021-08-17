@@ -43,16 +43,16 @@ class PYSched:
             bestDev = {}
             for devId in dev_keys:          # For each device in that cluster
 
-                curDev = available_devices[devId]
+                curDev = available_devices[devId].copy()
 
                 if curDev['cluster'] == clusterId:
 
                     if len(bestDev.keys()) == 0:
                         # This is the first device in cluster
-                        bestDev = copy.deepcopy(curDev)
+                        bestDev = curDev.copy()
                     elif curDev["cpu_usage"] < bestDev["cpu_usage"]:
                         # Is this device any faster?
-                        bestDev = copy.deepcopy(curDev)
+                        bestDev = curDev.copy()
 
                 # TODO: these keys are also available to us...
                 #available_devices[request.id]['cpu_usage']
@@ -61,7 +61,7 @@ class PYSched:
                 #available_devices[request.id]['virtual_mem']
                 #available_devices[request.id]['battery']
 
-            selected_devices[bestDev["id"]] = bestDev
+            selected_devices[bestDev["id"]] = bestDev.copy()
 
         return selected_devices
 
