@@ -25,3 +25,14 @@ def cluster_hist(histogramList, keySpace):
     yhat = model.fit_predict(X)
 
     return yhat
+
+
+"""
+Basic clustering routine for clustering a list of histograms.
+Searches for clusters of at least 2 points. Returns an array of assignments
+with a -1 indicating that no suitable cluster was found for that device.
+"""
+def cluster_mat(matList, keySpace):
+
+    pass
+
