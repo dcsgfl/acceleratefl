@@ -1,6 +1,8 @@
 import random
 
-class RNDSched:
+from scheduler import Scheduler
+
+class RNDSched(Scheduler):
     def __init__(self):
         pass
 
@@ -11,6 +13,9 @@ class RNDSched:
             selected_devices[key] = available_devices[key].copy()
         return(selected_devices)
     
+    def notify_worker_updates(self, all_devices):
+        pass
+
     class Factory:
         def get(self):
             return RNDSched()

@@ -1,7 +1,10 @@
 import math
 import numpy as np
 
-class PXYSched:
+from scheduler import Scheduler
+
+class PXYSched(Scheduler):
+
     def __init__(self):
         self.G_CACHED_SUMMARIES = {}
 
@@ -131,6 +134,9 @@ class PXYSched:
             if(dev.id in selected_devid):
                 res.append(dev)
         return (res)
+
+    def notify_worker_updates(self, all_devices):
+        pass
 
     class Factory:
         def get(self):

@@ -9,7 +9,10 @@ sys.path.append(pwd)
 from cluster import cluster_hist
 from hist import HistSummary
 
-class PYSched:
+from scheduler import Scheduler
+
+class PYSched(Scheduler):
+
     def __init__(self):
         pass
 
@@ -68,6 +71,9 @@ class PYSched:
                 selected_devices[bestDev["id"]] = bestDev.copy()
 
         return selected_devices
+
+    def notify_worker_updates(self, all_devices):
+        pass
 
     class Factory:
         def get(self):

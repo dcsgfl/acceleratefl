@@ -9,7 +9,10 @@ sys.path.append(pwd)
 from cluster import cluster_hist
 from hist import HistSummary
 
-class LOSSched:
+from scheduler import Scheduler
+
+class LOSSched(Scheduler):
+
     def __init__(self):
         pass
 
@@ -65,6 +68,9 @@ class LOSSched:
                 selected_devices[bestDev["id"]] = bestDev.copy()
 
         return selected_devices
+
+    def notify_worker_updates(self, all_devices):
+        pass
 
     class Factory:
         def get(self):
