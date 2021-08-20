@@ -19,7 +19,7 @@ class Scheduler:
 
     @param all_devices  A list of all devices the server is aware of
     """
-    def notify_worker_updates(self, all_devices):
+    def notify_worker_update(self, all_devices):
         raise NotImplementedError
 
     """

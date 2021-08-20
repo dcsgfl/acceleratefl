@@ -45,12 +45,13 @@ from hist import HistSummary
 
 class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     
-    def __init__(self):
+    def __init__(self, args):
         super().__init__()
         self.available_devices = {}
         self.n_available_devices = 0
         self.n_device_summaries = 0
         self.lock = threading.Lock()
+        self.scheduler = schedftry.getScheduler(args.scheduler)
         
     def RegisterToCentral(self, request, context):
         msg = request.ip + ':' + str(request.flport)
@@ -93,9 +94,11 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         )
 
     def SendSummary(self, request, context):
+
         self.lock.acquire()
         self.available_devices[request.id]['summary'] = request.summary
         self.n_device_summaries += 1
+        self.scheduler.notify_worker_update(self.available_devices)
         self.lock.release()
         
         logging.info('Data summary: ' + str(request.summary))
@@ -103,6 +106,12 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         return devicetocentral_pb2.SummaryAck(
             ack = True,
         )
+
+    def schedule_best_worker_instances(self, available_devices, client_threshold=10):
+        self.lock.acquire()
+        workers = self.scheduler.select_worker_instances(available_devices, client_threshold)
+        self.lock.release()
+        return workers
 
  # Loss function
 
@@ -187,10 +196,6 @@ def set_worker_conn(hook, available_devices, previous_worker_instances, verbose)
     
     return worker_instances
 
-def schedule_best_worker_instances(available_clients, client_threshold=10, sched_type='RNDSched'):
-    scheduler = schedftry.getScheduler(sched_type)
-    return scheduler.select_worker_instances(available_clients, client_threshold)
-
 
 async def train_and_eval(args, devcentral, client_threshold, verbose):
    
@@ -225,7 +230,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
             else:
                 devcentral.lock.release()
         schedule_start_time = time.time()
-        selected_worker_instances = schedule_best_worker_instances(temp_instances, client_threshold, args.scheduler)
+        selected_worker_instances = devcentral.schedule_best_worker_instances(temp_instances, client_threshold)
         schedule_end_time = time.time()
 
         worker_instances = set_worker_conn(hook, selected_worker_instances, previous_worker_instances, verbose)
@@ -333,7 +338,7 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--scheduler',
         type = str,
-        default = 'PYSched',
+        default = 'RNDSched',
         help = 'Scheduler type',
     )
 

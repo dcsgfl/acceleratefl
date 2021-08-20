@@ -51,6 +51,7 @@ devs["dev_3"] = getDevice("dev_3", 1000, keySpace)
 
 #print(devs)
 py = PYSched()
+py.notify_worker_update(devs)
 
 ignored_thresh = 0
 selected_devs = py.select_worker_instances(devs, ignored_thresh)
