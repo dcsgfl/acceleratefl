@@ -7,6 +7,7 @@ UMN DCSG, 2021
 
 import numpy as np
 from numpy import unique
+from numpy.linalg import norm
 
 from sklearn.cluster import DBSCAN
 
@@ -32,7 +33,25 @@ Basic clustering routine for clustering a list of histograms.
 Searches for clusters of at least 2 points. Returns an array of assignments
 with a -1 indicating that no suitable cluster was found for that device.
 """
-def cluster_mat(matList, keySpace):
+def cluster_mat(matList, xKeySpace, yKeySpace):
 
-    pass
+    dim = len(matList)
+    distMat = np.zeros((dim, dim))
+
+    mats = []
+    for i in range(dim):
+        mat = matList[i].toMatrix(xKeySpace, yKeySpace)
+        mats.append(mat)
+
+    for i in range(dim):
+        for j in range(i, dim):
+            dist = norm(mats[i] - mats[j])
+            distMat[i,j] = dist
+            distMat[j,i] = dist
+
+    model = DBSCAN(eps=1.0, min_samples=2,
+                   metric='precomputed')
+    yhat = model.fit_predict(distMat)
+
+    return yhat
 

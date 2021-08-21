@@ -3,4 +3,4 @@ pip3 install --upgrade tensorflow
 pip3 install pysyft
 pip3 install torchvision
 pip3 install grpcio-tools
-pip install syft==0.2.5 -f https://download.pytorch.org/whl/torch_stable.html
+pip3 install syft==0.2.5 -f https://download.pytorch.org/whl/torch_stable.html

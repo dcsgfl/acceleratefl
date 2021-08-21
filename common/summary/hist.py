@@ -40,6 +40,9 @@ class HistSummary(object):
             else:
                 self.values[k] = newValue
 
+    def at(self, key):
+        return self.values[key]
+
     def getKeys(self):
         return set(self.values.keys())
 
@@ -140,6 +143,9 @@ class HistMatSummary(object):
         for k in self.values.keys():
             self.values[k].addNoise(epsilon)
 
+    def at(self, key):
+        return self.values[key]
+
     def getKeys(self):
         return set(self.values.keys())
 
@@ -167,15 +173,29 @@ class HistMatSummary(object):
     def __str__(self):
         return self.toJson()
 
-    def toMatrix(self, keySpace):
+    def toMatrix(self, xKeySpace, yKeySpace):
 
-        arr = np.zeros(len(keySpace))
-        arrIdx = 0
+        arr = np.zeros((len(yKeySpace), len(xKeySpace)))
+        rowIdx = 0
+        colIdx = 0
 
-        for key in keySpace:
-            if key in self.values.keys():
-                arr[arrIdx] = float(self.values[key])
-            arrIdx += 1
+        myYKeys = self.values.keys()
+
+        for yKey in yKeySpace:
+            if yKey in myYKeys:
+
+                colIdx = 0
+                rowSum = 0.0
+                myXKeys = self.values[yKey].getKeys()
+                for xKey in xKeySpace:
+                    if xKey in myXKeys:
+                        val = float(self.values[yKey].at(xKey))
+                        arr[rowIdx, colIdx] = val
+                        rowSum += val
+
+                    colIdx += 1
+                arr[rowIdx,:] /= rowSum
+            rowIdx += 1
 
         return arr
 

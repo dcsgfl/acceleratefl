@@ -43,6 +43,8 @@ from modelFactory import ModelFactory as mdlftry
 from schedulerFactory import SchedulerFactory as schedftry
 from hist import HistSummary
 
+LOCK_TRACE = False
+
 class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     
     def __init__(self, args):
@@ -50,21 +52,31 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         self.available_devices = {}
         self.n_available_devices = 0
         self.n_device_summaries = 0
-        self.lock = threading.Lock()
+        self.lockObj = threading.Lock()
         self.scheduler = schedftry.getScheduler(args.scheduler)
         
+    def lock(self, traceStr="default"):
+        global LOCK_TRACE
+        if LOCK_TRACE: print("Server Lock   - " + traceStr)
+        self.lockObj.acquire()
+
+    def unlock(self, traceStr=""):
+        global LOCK_TRACE
+        if LOCK_TRACE: print("Server Unlock - " + traceStr)
+        self.lockObj.release()
+
     def RegisterToCentral(self, request, context):
         msg = request.ip + ':' + str(request.flport)
         id = util.get_id(msg)
         
-        self.lock.acquire()
+        self.lock()
         if id not in self.available_devices:
             self.available_devices[id] = {}
             self.available_devices[id]['id'] = id
             self.available_devices[id]['ip'] = request.ip
             self.available_devices[id]['flport'] = request.flport
             self.n_available_devices += 1
-        self.lock.release()
+        self.unlock()
 
         logging.info('Registered client ' + request.ip + ':' + str(request.flport) + '...')
         
@@ -74,13 +86,13 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         )
     
     def HeartBeat(self, request, context):
-        self.lock.acquire()
+        self.lock()
         self.available_devices[request.id]['cpu_usage'] = request.cpu_usage
         self.available_devices[request.id]['ncpus'] = request.ncpus
         self.available_devices[request.id]['load'] = request.load15
         self.available_devices[request.id]['virtual_mem'] = request.virtual_mem
         self.available_devices[request.id]['battery'] = request.battery
-        self.lock.release()
+        self.unlock()
 
         # logging.info(request.id + ': [cpu_usage: ' + str(request.cpu_usage) +
         #                     ', ncpus: ' + str(request.ncpus) + 
@@ -94,30 +106,36 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         )
 
     def SendSummary(self, request, context):
+<<<<<<< HEAD
         self.lock.acquire()
+=======
+
+        self.lock()
+>>>>>>> c049b62e2080beb7bffa80849fd2b0e3d38b0c0f
         self.available_devices[request.id]['summary'] = request.summary
         self.n_device_summaries += 1
-        self.lock.release()
-
-        while True:
-            self.lock.acquire()
-            if self.n_available_devices == self.n_device_summaries:
-                self.scheduler.notify_worker_update(self.available_devices)        
-                self.lock.release()
-                break
-            else:
-                self.lock.release()
-        
+        if self.n_available_devices == self.n_device_summaries:
+            self.scheduler.notify_worker_update(self.available_devices)        
+        self.unlock()
         logging.info('Data summary: ' + str(request.summary))
+
+        #while True:
+        #    self.lock()
+        #    if self.n_available_devices == self.n_device_summaries:
+        #        self.scheduler.notify_worker_update(self.available_devices)        
+        #        self.unlock()
+        #        break
+        #    else:
+        #        self.unlock()
 
         return devicetocentral_pb2.SummaryAck(
             ack = True,
         )
 
     def schedule_best_worker_instances(self, available_devices, client_threshold=10):
-        self.lock.acquire()
+        self.lock()
         workers = self.scheduler.select_worker_instances(available_devices, client_threshold)
-        self.lock.release()
+        self.unlock()
         return workers
 
 
@@ -228,11 +246,12 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
     batch_size = 128
 
     while True:
-        devcentral.lock.acquire()
+        devcentral.lock("train block 1")
         if devcentral.n_available_devices < client_threshold:
-            devcentral.lock.release()
+            devcentral.unlock()
+            time.sleep(3)
         else:
-            devcentral.lock.release()
+            devcentral.unlock()
             break
     
     # setup connection with all devices
@@ -242,14 +261,14 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
     for curr_round in range(0, args.epochs):
 
         while True:
-            devcentral.lock.acquire()
+            devcentral.lock("train block 2")
             if devcentral.n_available_devices == devcentral.n_device_summaries:
                 available_devices = copy.deepcopy(devcentral.available_devices)
-                devcentral.lock.release()
+                devcentral.unlock()
                 time.sleep(3)
                 break
             else:
-                devcentral.lock.release()
+                devcentral.unlock()
 
         set_worker_conn(hook, available_devices, available_instances, verbose)
         schedule_start_time = time.time()
