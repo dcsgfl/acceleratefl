@@ -98,8 +98,16 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         self.lock.acquire()
         self.available_devices[request.id]['summary'] = request.summary
         self.n_device_summaries += 1
-        self.scheduler.notify_worker_update(self.available_devices)
         self.lock.release()
+
+        while True:
+            self.lock.acquire()
+            if self.n_available_devices == self.n_device_summaries:
+                self.scheduler.notify_worker_update(self.available_devices)        
+                self.lock.release()
+                break
+            else:
+                self.lock.release()
         
         logging.info('Data summary: ' + str(request.summary))
 
@@ -402,7 +410,7 @@ if __name__ == '__main__':
     grpcservice.start()
 
     # train and eval models 
-    client_threshold = 10
+    client_threshold = 3
     asyncio.get_event_loop().run_until_complete(
         train_and_eval(args, devcentral, client_threshold, args.verbose)
     )
