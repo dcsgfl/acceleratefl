@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x15\x64\x65vicetocentral.proto\"(\n\nDeviceInfo\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0e\n\x06\x66lport\x18\x02 \x01(\x05\"(\n\tRegStatus\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\n\n\x02id\x18\x02 \x01(\t\"j\n\x04Ping\x12\x11\n\tcpu_usage\x18\x01 \x01(\x02\x12\r\n\x05ncpus\x18\x02 \x01(\x05\x12\x0e\n\x06load15\x18\x03 \x01(\x02\x12\x13\n\x0bvirtual_mem\x18\x04 \x01(\x02\x12\x0f\n\x07\x62\x61ttery\x18\x05 \x01(\x02\x12\n\n\x02id\x18\x06 \x01(\t\"\x13\n\x04Pong\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\",\n\rDeviceSummary\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0f\n\x07summary\x18\x02 \x01(\t\"\x19\n\nSummaryAck\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\x32\x8c\x01\n\x0f\x44\x65viceToCentral\x12.\n\x11RegisterToCentral\x12\x0b.DeviceInfo\x1a\n.RegStatus\"\x00\x12\x1b\n\tHeartBeat\x12\x05.Ping\x1a\x05.Pong\"\x00\x12,\n\x0bSendSummary\x12\x0e.DeviceSummary\x1a\x0b.SummaryAck\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x15\x64\x65vicetocentral.proto\"(\n\nDeviceInfo\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0e\n\x06\x66lport\x18\x02 \x01(\x05\"(\n\tRegStatus\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\n\n\x02id\x18\x02 \x01(\t\"j\n\x04Ping\x12\x11\n\tcpu_usage\x18\x01 \x01(\x02\x12\r\n\x05ncpus\x18\x02 \x01(\x05\x12\x0e\n\x06load15\x18\x03 \x01(\x02\x12\x13\n\x0bvirtual_mem\x18\x04 \x01(\x02\x12\x0f\n\x07\x62\x61ttery\x18\x05 \x01(\x02\x12\n\n\x02id\x18\x06 \x01(\t\"\x13\n\x04Pong\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\":\n\rDeviceSummary\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07summary\x18\x03 \x01(\t\"\x19\n\nSummaryAck\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\x32\x8c\x01\n\x0f\x44\x65viceToCentral\x12.\n\x11RegisterToCentral\x12\x0b.DeviceInfo\x1a\n.RegStatus\"\x00\x12\x1b\n\tHeartBeat\x12\x05.Ping\x1a\x05.Pong\"\x00\x12,\n\x0bSendSummary\x12\x0e.DeviceSummary\x1a\x0b.SummaryAck\"\x00\x62\x06proto3'
 )
 
 
@@ -218,8 +218,15 @@ _DEVICESUMMARY = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='summary', full_name='DeviceSummary.summary', index=1,
+      name='type', full_name='DeviceSummary.type', index=1,
       number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='summary', full_name='DeviceSummary.summary', index=2,
+      number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -237,7 +244,7 @@ _DEVICESUMMARY = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=238,
-  serialized_end=282,
+  serialized_end=296,
 )
 
 
@@ -268,8 +275,8 @@ _SUMMARYACK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=284,
-  serialized_end=309,
+  serialized_start=298,
+  serialized_end=323,
 )
 
 DESCRIPTOR.message_types_by_name['DeviceInfo'] = _DEVICEINFO
@@ -331,8 +338,8 @@ _DEVICETOCENTRAL = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=312,
-  serialized_end=452,
+  serialized_start=326,
+  serialized_end=466,
   methods=[
   _descriptor.MethodDescriptor(
     name='RegisterToCentral',

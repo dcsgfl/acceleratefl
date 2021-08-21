@@ -109,6 +109,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
 
         self.lock()
         self.available_devices[request.id]['summary'] = request.summary
+        self.available_devices[request.id]['summary_type'] = request.type
         self.n_device_summaries += 1
         if self.n_available_devices == self.n_device_summaries:
             self.scheduler.notify_worker_update(self.available_devices)        

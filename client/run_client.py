@@ -31,7 +31,7 @@ from utilities import Utility as util
 import devicetocentral_pb2
 import devicetocentral_pb2_grpc
 
-from hist import HistSummary
+from hist import HistSummary, HistMatSummary
 
 devid = ""
 
@@ -96,19 +96,34 @@ def send_summary(args, datacls):
 
     tensor_train_x, tensor_train_y = datacls.get_training_data(devid)
     train_y = tensor_train_y.numpy()
+    summaryType = args.summary.lower()
     summaryPayload = ""
 
-    if args.summary.lower() == "py":
+    if summaryType == "py":
 
         histInput = list(map(str, train_y.tolist()))
         histSummary = HistSummary(histInput)
         summaryPayload = histSummary.toJson()
 
-    elif args.summary.lower() == "pxy":
+    elif summaryType == "pxy":
 
-        pass
+        train_x = tensor_train_x.numpy()
+        histInput = {}
+        labels = list(map(str, train_y.tolist()))
+        for label in set(labels):
+            xidx = labels.index(label)
+            data = []
+            for idx in xidx:
+                data.append(train_x[idx,:].tolist())
+
+            hs = HistSummary(data)
+            histInput[label] = hs
+
+        histSummary = HistMatSummary(histInput)
+        summaryPayload = histSummary.toJson()
 
     else:
+
         print("Summary " + args.summary + " not implemented")
         return False
 
@@ -118,6 +133,7 @@ def send_summary(args, datacls):
         resp = stub.SendSummary(
             devicetocentral_pb2.DeviceSummary (
                 id = devid,
+                type = summaryType,
                 summary = summaryPayload,
             )
         )
