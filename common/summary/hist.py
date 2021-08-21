@@ -182,13 +182,16 @@ class HistMatSummary(object):
             if yKey in myYKeys:
 
                 colIdx = 0
+                rowSum = 0.0
                 myXKeys = self.values[yKey].getKeys()
                 for xKey in xKeySpace:
                     if xKey in myXKeys:
-                        arr[rowIdx, colIdx] = float(self.values[yKey].at(xKey))
+                        val = float(self.values[yKey].at(xKey))
+                        arr[rowIdx, colIdx] = val
+                        rowSum += val
 
                     colIdx += 1
-                    
+                arr[rowIdx,:] /= rowSum
             rowIdx += 1
 
         return arr
