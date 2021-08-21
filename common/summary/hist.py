@@ -143,6 +143,9 @@ class HistMatSummary(object):
         for k in self.values.keys():
             self.values[k].addNoise(epsilon)
 
+    def at(self, key):
+        return self.values[key]
+
     def getKeys(self):
         return set(self.values.keys())
 
