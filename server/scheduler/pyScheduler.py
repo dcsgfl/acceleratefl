@@ -26,9 +26,8 @@ class PYSched(Scheduler):
         dev_keys = copy.deepcopy(list(all_devices.keys()))
 
         for devId in dev_keys:
-            device = all_devices[devId]
             histSummary = HistSummary()
-            histSummary.fromJson(device['summary'])
+            histSummary.fromJson(all_devices[devId]['summary'])
             summaries.append(histSummary)
             keyspace = keyspace.union(histSummary.getKeys())
             
