@@ -92,14 +92,25 @@ def heartbeat(args, once):
         if once:
             break
 
-# send summary to the central server at the start
-# TO DO: when to send the summary next?
 def send_summary(args, datacls):
 
     tensor_train_x, tensor_train_y = datacls.get_training_data(devid)
     train_y = tensor_train_y.numpy()
-    histInput = list(map(str, train_y.tolist()))
-    histSummary = HistSummary(histInput)
+    summaryPayload = ""
+
+    if args.summary.lower() == "py":
+
+        histInput = list(map(str, train_y.tolist()))
+        histSummary = HistSummary(histInput)
+        summaryPayload = histSummary.toJson()
+
+    elif args.summary.lower() == "pxy":
+
+        pass
+
+    else:
+        print("Summary " + args.summary + " not implemented")
+        return False
 
     with grpc.insecure_channel(args.centralip + ':50051') as channel:
         stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
@@ -107,7 +118,7 @@ def send_summary(args, datacls):
         resp = stub.SendSummary(
             devicetocentral_pb2.DeviceSummary (
                 id = devid,
-                summary = histSummary.toJson(),
+                summary = summaryPayload,
             )
         )
 
@@ -179,6 +190,14 @@ def parse_arguments(args = sys.argv[1:]):
         type=str,
         default='MNIST',
         help='dataset used for the model: --dataset CIFAR10'
+    )
+
+    parser.add_argument(
+        '--summary',
+        '-s',
+        type=str,
+        default='py',
+        help='data summary to send: --summary py'
     )
 
     parser.add_argument(
