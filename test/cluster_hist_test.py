@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 import os
 import sys
@@ -53,6 +54,8 @@ h62 = HistSummary(l62)
 h72 = HistSummary(l72)
 h82 = HistSummary(l82)
 h92 = HistSummary(l92)
+
+h01.addNoise(0.5)
 
 hlist = [h01, h11, h21, h31, h41, h51, h61, h71, h81, h91,
          h02, h12, h22, h32, h42, h52, h62, h72, h82, h92]
