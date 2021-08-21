@@ -94,7 +94,6 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         )
 
     def SendSummary(self, request, context):
-
         self.lock.acquire()
         self.available_devices[request.id]['summary'] = request.summary
         self.n_device_summaries += 1
