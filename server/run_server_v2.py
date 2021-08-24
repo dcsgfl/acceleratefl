@@ -41,7 +41,6 @@ import devicetocentral_pb2_grpc
 from utilities import Utility as util
 from modelFactory import ModelFactory as mdlftry
 from schedulerFactory import SchedulerFactory as schedftry
-from hist import HistSummary
 
 LOCK_TRACE = False
 

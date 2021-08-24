@@ -6,8 +6,8 @@ import copy
 pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', '..', 'common','summary')
 sys.path.append(pwd)
 
-from cluster import cluster_hist
-from hist import HistSummary
+from cluster import cluster_mat
+from hist import HistSummary, HistMatSummary
 
 from scheduler import Scheduler
 

@@ -109,17 +109,23 @@ def send_summary(args, datacls):
 
         train_x = tensor_train_x.numpy()
         histInput = {}
-        labels = list(map(str, train_y.tolist()))
-        for label in set(labels):
-            xidx = labels.index(label)
-            data = []
-            for idx in xidx:
-                data.append(train_x[idx,:].tolist())
+        histMatInput = {}
 
-            hs = HistSummary(data)
-            histInput[label] = hs
+        labelSpace = list(map(str, np.unique(train_y)))
+        for label in labelSpace:
+            histInput[label] = []
 
-        histSummary = HistMatSummary(histInput)
+        for idx in range(len(train_y)):
+            label = str(train_y[idx])
+            xarr = train_x[idx,:].flatten()
+            sd = list(map(str, xarr))
+            histInput[label] += sd
+
+        for label in labelSpace:
+            hip = histInput[label]
+            histMatInput[label] = HistSummary(hip)
+
+        histSummary = HistMatSummary(histMatInput)
         summaryPayload = histSummary.toJson()
 
     else:
