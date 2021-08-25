@@ -5,8 +5,8 @@ file = open("pyscheduler.log")
 
 content = file.readlines()
 
-lineIdx = 4
-lineInc = 5
+lineIdx = 30
+lineInc = 31
 
 nLines = len(content)
 
@@ -33,7 +33,7 @@ plt.ylabel('Accuracy')
 plt.title('Accuracy vs Epoch')
 plt.show()
 
-x_ticks = np.arange(0, 4100, 500)
+x_ticks = np.arange(0, 13500, 1000)
 y_ticks = np.arange(0, 1, 0.1)
 plt.plot(cumtimes, accuracy)
 plt.xticks(x_ticks)
