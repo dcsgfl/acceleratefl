@@ -5,6 +5,7 @@ import time
 import asyncio
 import argparse
 import threading
+import random
 import copy
 
 import torch
@@ -169,7 +170,9 @@ async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, 
         optimizer="SGD",
         optimizer_args={"lr": lr},
     )
-
+    random.seed(int(worker.id))
+    latency = random.randint(0, 10)
+    await asyncio.sleep(latency)
     train_config.send(worker)
     loss = await worker.async_fit(dataset_key=dataset + '_TRAIN', return_ids=[0])      # TODO: add deadline here
     model = train_config.model_ptr.get().obj
@@ -193,7 +196,7 @@ def evaluate_model_on_worker(model_identifier, worker, dataset_key, model, nr_bi
 
     if print_target_hist:
         print("Target histogram: ", hist_target)
-    print(worker.id, "Average loss: ",test_loss,", Accuracy: ",100.0 * correct / len_dataset, ", total: ", len_dataset, "correct: ", correct)
+    # print(worker.id, "Average loss: ",test_loss,", Accuracy: ",100.0 * correct / len_dataset, ", total: ", len_dataset, "correct: ", correct)
     return(correct, len_dataset)
 
 # sets up connection only if required. This means for evaluation, only a selected set of devices are used
