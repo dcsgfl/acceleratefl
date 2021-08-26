@@ -43,7 +43,7 @@ class PYSched(Scheduler):
                 nextClustId += 1
 
             all_devices[devId]['cluster'] = dev_clusters[idx]
-            clusterstr = clusterstr +  ' ' + devId + ' -- ' + dev_clusters[idx]
+            clusterstr = clusterstr +  ' ' + devId + ' -- ' + str(dev_clusters[idx])
 
         print(clusterstr)
         self.cluster_ids = set(dev_clusters)

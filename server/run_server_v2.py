@@ -322,7 +322,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                 )
                 _correct+=correct
                 _total+=total
-            print("EPOCH:", curr_round, " AVG_ACCURACY: ",_correct/_total, "TIME: ", schedule_end_time - schedule_start_time + train_end_time - train_start_time)
+            print("EPOCH:", curr_round, " AVG_ACCURACY: ",_correct/_total,"#WORKERS: ", len(selected_worker_instances),  " SCHED TIME: ", schedule_end_time - schedule_start_time, " TRAIN TIME: ", train_end_time - train_start_time, " TOTAL: ", schedule_end_time - schedule_start_time + train_end_time - train_start_time)
 
         # decay learning rate
         learning_rate = max(0.98 * learning_rate, args.lr * 0.01)
