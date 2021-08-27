@@ -387,7 +387,7 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--scheduler',
         type = str,
-        default = 'PYSched',
+        default = 'RNDSched',
         help = 'Scheduler type',
     )
 
@@ -437,7 +437,7 @@ if __name__ == '__main__':
     grpcservice.start()
 
     # train and eval models 
-    client_threshold = 3
+    client_threshold = 10
     asyncio.get_event_loop().run_until_complete(
         train_and_eval(args, devcentral, client_threshold, args.verbose)
     )
