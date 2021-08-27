@@ -172,10 +172,10 @@ async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, 
     )
     random.seed(int(worker.id))
     latency = random.randint(0, 10)
-    await asyncio.sleep(latency)
-    print(worker.id, 'sleep: ', latency)
-    train_config.send(worker)
+    
     fit_start_time = time.time()
+    await asyncio.sleep(latency)
+    train_config.send(worker)
     loss = await worker.async_fit(dataset_key=dataset + '_TRAIN', return_ids=[0])      # TODO: add deadline here
     model = train_config.model_ptr.get().obj
     fit_end_time = time.time()
