@@ -2,6 +2,7 @@ from rndScheduler import RNDSched
 from pyScheduler import PYSched
 from pxyScheduler import PXYSched
 from lossScheduler import LOSSched
+from oortScheduler import OORTSched
 
 class SchedulerFactory:
     factories = {}

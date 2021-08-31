@@ -8,6 +8,8 @@ import threading
 import random
 import copy
 
+import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -45,6 +47,8 @@ from schedulerFactory import SchedulerFactory as schedftry
 
 LOCK_TRACE = False
 
+np.random.seed(1111)
+
 class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     
     def __init__(self, args):
@@ -75,6 +79,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
             self.available_devices[id]['id'] = id
             self.available_devices[id]['ip'] = request.ip
             self.available_devices[id]['flport'] = request.flport
+            self.available_devices[id]['latency'] = np.random.beta(1, 10) * 50
             self.n_available_devices += 1
         self.unlock()
 
@@ -110,6 +115,10 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         self.lock()
         self.available_devices[request.id]['summary'] = request.summary
         self.available_devices[request.id]['summary_type'] = request.type
+        n_train_data = 0
+        for labels in request.summary.keys():
+            n_train_data += request.summary[labels]
+        self.available_devices[request.id]['n_train'] = n_train_data
         self.n_device_summaries += 1
         if self.n_available_devices == self.n_device_summaries:
             self.scheduler.notify_worker_update(self.available_devices)        
