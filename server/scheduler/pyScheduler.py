@@ -34,6 +34,7 @@ class PYSched(Scheduler):
         dev_clusters = cluster_hist(summaries, list(keyspace))
         nextClustId = max(dev_clusters) + 1
 
+        clusterstr = ""
         for idx, devId in enumerate(dev_keys):
 
             # Assign the -1 values to their own cluster
@@ -42,7 +43,9 @@ class PYSched(Scheduler):
                 nextClustId += 1
 
             all_devices[devId]['cluster'] = dev_clusters[idx]
+            clusterstr = clusterstr +  ' ' + devId + ' -- ' + str(dev_clusters[idx])
 
+        print(clusterstr)
         self.cluster_ids = set(dev_clusters)
 
     def select_worker_instances(self, available_devices, client_threshold):

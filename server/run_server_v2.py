@@ -5,6 +5,7 @@ import time
 import asyncio
 import argparse
 import threading
+import random
 import copy
 
 import torch
@@ -169,12 +170,19 @@ async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, 
         optimizer="SGD",
         optimizer_args={"lr": lr},
     )
-
+    random.seed(int(worker.id))
+    latency = random.randint(0, 10)
+    
+    fit_start_time = time.time()
+    await asyncio.sleep(latency)
     train_config.send(worker)
     loss = await worker.async_fit(dataset_key=dataset + '_TRAIN', return_ids=[0])      # TODO: add deadline here
     model = train_config.model_ptr.get().obj
+    fit_end_time = time.time()
     
-    return worker.id, model, loss
+    fit_time = fit_end_time - fit_start_time
+
+    return worker.id, model, loss, fit_time
 
 def evaluate_model_on_worker(model_identifier, worker, dataset_key, model, nr_bins, batch_size, device, print_target_hist=False):
     model.eval()
@@ -193,7 +201,7 @@ def evaluate_model_on_worker(model_identifier, worker, dataset_key, model, nr_bi
 
     if print_target_hist:
         print("Target histogram: ", hist_target)
-    print(worker.id, "Average loss: ",test_loss,", Accuracy: ",100.0 * correct / len_dataset, ", total: ", len_dataset, "correct: ", correct)
+    # print(worker.id, "Average loss: ",test_loss,", Accuracy: ",100.0 * correct / len_dataset, ", total: ", len_dataset, "correct: ", correct)
     return(correct, len_dataset)
 
 # sets up connection only if required. This means for evaluation, only a selected set of devices are used
@@ -294,10 +302,13 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
         # test_models = curr_round % 10 == 1 or curr_round == args.training_rounds
 
         # Federate models (note that this will also change the model in models[0]
-        for worker_id, worker_model, worker_loss in results:    # training loss
+        avg_fit_time = 0.0
+        for worker_id, worker_model, worker_loss, fit_time in results:    # training loss
+            avg_fit_time += fit_time
             if worker_model is not None:
                 models[worker_id] = worker_model
                 loss_values[worker_id] = worker_loss
+        avg_fit_time = avg_fit_time / float(len(results))
 
         traced_model = utils.federated_avg(models)
 
@@ -306,6 +317,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
             # evaluate_model_locally(traced_model)
             _correct=0
             _total=0
+            eval_start_time = time.time()
             for devid in available_instances:
                 correct, total=evaluate_model_on_worker(        # test accuracy
                     model_identifier="Federated model",
@@ -319,7 +331,8 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                 )
                 _correct+=correct
                 _total+=total
-            print("EPOCH:", curr_round, " AVG_ACCURACY: ",_correct/_total, "TIME: ", schedule_end_time - schedule_start_time + train_end_time - train_start_time)
+            eval_end_time = time.time()
+            print("EPOCH:", curr_round, " AVG_ACCURACY: ",_correct/_total,"#WORKERS: ", len(selected_worker_instances),  " SCHED TIME: ", schedule_end_time - schedule_start_time, " TRAIN TIME: ", train_end_time - train_start_time, " TOTAL TRAIN: ", schedule_end_time - schedule_start_time + train_end_time - train_start_time, " FIT TIME: ", avg_fit_time,  " EVAL TIME: ", eval_end_time - eval_start_time)
 
         # decay learning rate
         learning_rate = max(0.98 * learning_rate, args.lr * 0.01)
@@ -374,7 +387,7 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--scheduler',
         type = str,
-        default = 'PYSched',
+        default = 'RNDSched',
         help = 'Scheduler type',
     )
 
@@ -424,7 +437,7 @@ if __name__ == '__main__':
     grpcservice.start()
 
     # train and eval models 
-    client_threshold = 3
+    client_threshold = 10
     asyncio.get_event_loop().run_until_complete(
         train_and_eval(args, devcentral, client_threshold, args.verbose)
     )
