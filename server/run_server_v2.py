@@ -180,15 +180,17 @@ async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, 
         optimizer="SGD",
         optimizer_args={"lr": lr},
     )
-    random.seed(int(worker.id))
-    latency = random.randint(0, 10)
-    
+    base_latency = 45
+    np.random.seed(int(worker.id))
+    latency =  base_latency + np.random.beta(1, 10) * 50
     fit_start_time = time.time()
     await asyncio.sleep(latency)
+    fit_end_time = time.time()
+    
     train_config.send(worker)
     loss = await worker.async_fit(dataset_key=dataset + '_TRAIN', return_ids=[0])      # TODO: add deadline here
     model = train_config.model_ptr.get().obj
-    fit_end_time = time.time()
+    
     
     fit_time = fit_end_time - fit_start_time
 
