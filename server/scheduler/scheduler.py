@@ -82,7 +82,7 @@ class Scheduler:
             utility = []
             for dev in cdevs[cid]:
                 #util = dev['loss'] / (1.0 + (dev['cpu_usage'] / 100.0))
-                util = 100.0 - dev['cpu_usage']
+                util = 1.0 - dev['cpu_usage']
                 utility.append(util)
 
             s = [x for _, x in sorted(zip(utility, cdevs[cid]),
@@ -95,8 +95,8 @@ class Scheduler:
         #
         selected = {}
 
-        print(clusters)
-        print(probs)
+        #print(clusters)
+        #print(probs)
 
         count = len(clusters)
         for i in range(count):
@@ -118,7 +118,7 @@ class Scheduler:
                 for i2 in range(len(probs)):
                     probs[i2] += (p / float(len(probs)))
 
-        print(selected.keys())
+        #print(selected.keys())
 
         return selected
 

@@ -11,10 +11,12 @@ from hist import HistSummary
 
 from scheduler import Scheduler
 
+import logging
+
 class PYSched(Scheduler):
 
     def __init__(self):
-        self.cluster_ids = None
+        self.cluster_info = None
 
     def do_clustering(self, all_devices):
 
@@ -33,31 +35,49 @@ class PYSched(Scheduler):
             
         dev_clusters = cluster_hist(summaries, list(keyspace))
         nextClustId = max(dev_clusters) + 1
+        self.cluster_info = {}
 
         clusterstr = ""
         for idx, devId in enumerate(dev_keys):
 
+            clustId = dev_clusters[idx]
+
             # Assign the -1 values to their own cluster
-            if dev_clusters[idx] == -1:
-                dev_clusters[idx] = nextClustId
+            if clustId == -1:
+                clustId = nextClustId
                 nextClustId += 1
 
-            all_devices[devId]['cluster'] = dev_clusters[idx]
-            clusterstr = clusterstr +  ' ' + devId + ' -- ' + str(dev_clusters[idx])
+            if clustId not in self.cluster_info.keys():
+                self.cluster_info[clustId] = {}
+                self.cluster_info[clustId]["count"] = 0
 
-        print(clusterstr)
-        self.cluster_ids = set(dev_clusters)
+            self.cluster_info[clustId]["count"] += 1
+
+            all_devices[devId]['cluster'] = clustId
+            logging.info("cpu_usage, ncpus, load")
+            logging.info(all_devices[devId]['cpu_usage'])
+            logging.info(all_devices[devId]['ncpus'])
+            logging.info(all_devices[devId]['load'])
+
+        for clustId in self.cluster_info.keys():
+            num = float(self.cluster_info[clustId]["count"])
+            self.cluster_info[clustId]["prop"] = num / float(len(dev_keys))
+
+        logging.info("CLUSTERS ASSIGNED: " + str(set(dev_clusters)))
+
 
     def select_worker_instances(self, available_devices, client_threshold):
 
-        if self.cluster_ids is None:
+        if self.cluster_info is None:
             # Someone forgot to call notify_worker_update() ...
             # TODO this is really a bug... We might not have all the devices
             self.do_clustering(available_devices)
 
+        return self._schedule_clusters(self.cluster_info, available_devices, client_threshold)
+'''
         # This is a little slow... (n^2) but just moving on for now
         selected_devices = {}
-        for clusterId in self.cluster_ids: # For each identified cluster
+        for clusterId in self.cluster_info.keys(): # For each identified cluster
 
             bestDev = {}
             for devId in available_devices.keys():  # For each device in that cluster
@@ -83,6 +103,7 @@ class PYSched(Scheduler):
             selected_devices[bestDev["id"]] = bestDev.copy()
 
         return selected_devices
+'''
 
     def notify_worker_update(self, all_devices):
         self.do_clustering(all_devices)
