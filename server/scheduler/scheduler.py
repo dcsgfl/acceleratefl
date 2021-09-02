@@ -1,10 +1,11 @@
 """
 scheduler.py
 
-Abstract scheduler class for flsys
+Parent scheduler class for flsys
 UMN DCSG, 2021
 """
 
+from random import choices
 
 """
 All schedulers should implement the following interfaces
