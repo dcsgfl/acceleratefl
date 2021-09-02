@@ -5,6 +5,7 @@ Parent scheduler class for flsys
 UMN DCSG, 2021
 """
 
+import math
 from random import choices
 
 """
@@ -48,13 +49,16 @@ class Scheduler:
         # Compute the total loss in each cluster
         #
         for devId in available_devices:
+
             dev = available_devices[devId]
             clustId = dev["cluster"]
+            sqloss = math.pow(dev['loss'], 2.0)
+
             if clustId not in closs.keys():
-                closs[clustId] = dev['loss']
+                closs[clustId] = sqloss
                 cdevs[clustId] = []
             else:
-                closs[clustId] += dev['loss']
+                closs[clustId] += sqloss
 
             cdevs[clustId].append(dev.copy())
 
@@ -96,7 +100,7 @@ class Scheduler:
         selected = {}
 
         #print(clusters)
-        #print(probs)
+        print(probs)
 
         count = len(clusters)
         for i in range(count):

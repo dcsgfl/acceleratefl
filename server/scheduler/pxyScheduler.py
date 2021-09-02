@@ -11,10 +11,12 @@ from hist import HistSummary, HistMatSummary
 
 from scheduler import Scheduler
 
+import logging
+
 class PXYSched(Scheduler):
 
     def __init__(self):
-        self.cluster_ids = None
+        self.cluster_info = None
 
     def do_clustering(self, all_devices):
 
@@ -37,42 +39,59 @@ class PXYSched(Scheduler):
             
         dev_clusters = cluster_mat(summaries, list(xKeyspace), list(yKeyspace))
         nextClustId = max(dev_clusters) + 1
+        self.cluster_info = {}
 
         for idx, devId in enumerate(dev_keys):
 
+            clustId = dev_clusters[idx]
+
             # Assign the -1 values to their own cluster
-            if dev_clusters[idx] == -1:
-                dev_clusters[idx] = nextClustId
+            if clustId == -1:
+                clustId = nextClustId
                 nextClustId += 1
 
-            all_devices[devId]['cluster'] = dev_clusters[idx]
+            if clustId not in self.cluster_info.keys():
+                self.cluster_info[clustId] = {}
+                self.cluster_info[clustId]["count"] = 0
 
-        self.cluster_ids = set(dev_clusters)
+            self.cluster_info[clustId]["count"] += 1
+
+            all_devices[devId]['cluster'] = clustId
+            logging.info("cpu_usage")
+            logging.info(all_devices[devId]['cpu_usage'])
+
+        for clustId in self.cluster_info.keys():
+            num = float(self.cluster_info[clustId]["count"])
+            self.cluster_info[clustId]["prop"] = num / float(len(dev_keys))
+
+        logging.info("CLUSTERS ASSIGNED: " + str(set(dev_clusters)))
+
 
     def select_worker_instances(self, available_devices, client_threshold):
 
-        if self.cluster_ids is None:
+        if self.cluster_info is None:
             # Someone forgot to call notify_worker_update() ...
             # TODO this is really a bug... We might not have all the devices
             self.do_clustering(available_devices)
 
+        return self._schedule_clusters(self.cluster_info, available_devices, client_threshold)
         # This is a little slow... (n^2) but just moving on for now
-        selected_devices = {}
-        for clusterId in self.cluster_ids: # For each identified cluster
+        #selected_devices = {}
+        #for clusterId in self.cluster_ids: # For each identified cluster
 
-            bestDev = {}
-            for devId in available_devices.keys():  # For each device in that cluster
+        #    bestDev = {}
+        #    for devId in available_devices.keys():  # For each device in that cluster
 
-                curDev = available_devices[devId].copy()
+        #        curDev = available_devices[devId].copy()
     
-                if curDev['cluster'] == clusterId:
+        #        if curDev['cluster'] == clusterId:
 
-                    if len(bestDev.keys()) == 0:
+        #            if len(bestDev.keys()) == 0:
                         # This is the first device in cluster
-                        bestDev = curDev.copy()
-                    elif curDev["cpu_usage"] < bestDev["cpu_usage"]:
+        #                bestDev = curDev.copy()
+        #            elif curDev["cpu_usage"] < bestDev["cpu_usage"]:
                         # Is this device any faster?
-                        bestDev = curDev.copy()
+        #                bestDev = curDev.copy()
 
                 # TODO: these keys are also available to us...
                 #available_devices[request.id]['cpu_usage']
@@ -81,9 +100,9 @@ class PXYSched(Scheduler):
                 #available_devices[request.id]['virtual_mem']
                 #available_devices[request.id]['battery']
 
-            selected_devices[bestDev["id"]] = bestDev.copy()
+        #    selected_devices[bestDev["id"]] = bestDev.copy()
 
-        return selected_devices
+        #return selected_devices
 
     def notify_worker_update(self, all_devices):
         self.do_clustering(all_devices)
