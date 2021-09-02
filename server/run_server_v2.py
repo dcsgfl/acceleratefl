@@ -92,6 +92,8 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         self.available_devices[request.id]['load'] = request.load15
         self.available_devices[request.id]['virtual_mem'] = request.virtual_mem
         self.available_devices[request.id]['battery'] = request.battery
+        if "loss" not in self.available_devices[request.id].keys():
+            self.available_devices[request.id]['loss'] = 1.0
         self.unlock()
 
         # logging.info(request.id + ': [cpu_usage: ' + str(request.cpu_usage) +
@@ -331,6 +333,8 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                 )
                 _correct+=correct
                 _total+=total
+                devcentral.available_devices[devid]["loss"] = 1.0 - (float(correct) / float(total))
+
             eval_end_time = time.time()
             print("EPOCH:", curr_round, " AVG_ACCURACY: ",_correct/_total,"#WORKERS: ", len(selected_worker_instances),  " SCHED TIME: ", schedule_end_time - schedule_start_time, " TRAIN TIME: ", train_end_time - train_start_time, " TOTAL TRAIN: ", schedule_end_time - schedule_start_time + train_end_time - train_start_time, " FIT TIME: ", avg_fit_time,  " EVAL TIME: ", eval_end_time - eval_start_time)
 
