@@ -80,6 +80,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
             self.available_devices[id]['ip'] = request.ip
             self.available_devices[id]['flport'] = request.flport
             self.available_devices[id]['latency'] = np.random.beta(1, 10) * 50
+            self.available_devices[id]['stat_util'] = 0.0
             self.n_available_devices += 1
         self.unlock()
 
@@ -211,7 +212,7 @@ def evaluate_model_on_worker(model_identifier, worker, dataset_key, model, nr_bi
     if print_target_hist:
         print("Target histogram: ", hist_target)
     # print(worker.id, "Average loss: ",test_loss,", Accuracy: ",100.0 * correct / len_dataset, ", total: ", len_dataset, "correct: ", correct)
-    return(correct, len_dataset)
+    return(correct, len_dataset, test_loss)
 
 # sets up connection only if required. This means for evaluation, only a selected set of devices are used
 # def set_worker_conn(hook, available_devices, previous_worker_instances, verbose):
@@ -328,7 +329,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
             _total=0
             eval_start_time = time.time()
             for devid in available_instances:
-                correct, total=evaluate_model_on_worker(        # test accuracy
+                correct, total, loss=evaluate_model_on_worker(        # test accuracy
                     model_identifier="Federated model",
                     worker=available_instances[devid],
                     dataset_key=dataset + "_TEST",
@@ -338,6 +339,9 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                     device="cpu",
                     print_target_hist=False,
                 )
+                devcentral.lock("loss update")
+                devcentral.available_devices['loss'] = loss
+                devcentral.unlock()
                 _correct+=correct
                 _total+=total
             eval_end_time = time.time()
