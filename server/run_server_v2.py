@@ -339,7 +339,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                     device="cpu",
                     print_target_hist=False,
                 )
-                devcentral.lock("loss update")
+                devcentral.lock("loss update")     
                 devcentral.available_devices['loss'] = loss
                 devcentral.unlock()
                 _correct+=correct
