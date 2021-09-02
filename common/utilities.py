@@ -17,5 +17,5 @@ class Utility:
     def get_id(msg):
         md5 = hashlib.md5()
         md5.update(msg.encode())
-        return str(int(md5.hexdigest(), 16))[0:12]
+        return str(int(md5.hexdigest(), 16))[0:8]
     get_id = staticmethod(get_id) 
