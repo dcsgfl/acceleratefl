@@ -100,7 +100,7 @@ class Scheduler:
         selected = {}
 
         #print(clusters)
-        print(probs)
+        #print(probs)
 
         count = len(clusters)
         for i in range(count):
