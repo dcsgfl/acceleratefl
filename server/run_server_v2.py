@@ -88,7 +88,9 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     
     def HeartBeat(self, request, context):
         self.lock()
-        self.available_devices[request.id]['cpu_usage'] = request.cpu_usage
+        np.random.seed(int(request.id))
+        usage =  np.random.beta(1, 10) * 50
+        self.available_devices[request.id]['cpu_usage'] = usage
         self.available_devices[request.id]['ncpus'] = request.ncpus
         self.available_devices[request.id]['load'] = request.load15
         self.available_devices[request.id]['virtual_mem'] = request.virtual_mem
@@ -145,7 +147,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
 def loss_fn(pred, target):
     return F.nll_loss(input=pred, target=target)
 
-async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, lr, dataset):
+async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, lr, dataset, usage):
     """
     Send the model to the worker and fit the model on the worker's training data.
 
@@ -173,18 +175,14 @@ async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, 
         optimizer="SGD",
         optimizer_args={"lr": lr},
     )
-    base_latency = 45
-    np.random.seed(int(worker.id))
-    latency =  base_latency + np.random.beta(1, 10) * 50
-    fit_start_time = time.time()
-    await asyncio.sleep(latency)
-    fit_end_time = time.time()
+    base_latency = 45.0
+    latency =  base_latency + usage
 
     train_config.send(worker)
     loss = await worker.async_fit(dataset_key=dataset + '_TRAIN', return_ids=[0])      # TODO: add deadline here
     model = train_config.model_ptr.get().obj
     
-    fit_time = fit_end_time - fit_start_time
+    fit_time = latency
 
     return worker.id, model, loss, fit_time
 
@@ -292,7 +290,8 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                     batch_size=batch_size,    # batch_size_list[worker.id],
                     max_nr_batches=max_fed_epoch,
                     lr=learning_rate,
-                    dataset= dataset
+                    dataset= dataset,
+                    usage= available_devices[devid]['cpu_usage']
                 )
                 for devid in selected_worker_instances #if batch_size_list[worker.id]>0
             ]
