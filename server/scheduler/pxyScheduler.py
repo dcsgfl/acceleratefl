@@ -57,8 +57,8 @@ class PXYSched(Scheduler):
             self.cluster_info[clustId]["count"] += 1
 
             all_devices[devId]['cluster'] = clustId
-            logging.info("cpu_usage")
-            logging.info(all_devices[devId]['cpu_usage'])
+            #logging.info("cpu_usage")
+            #logging.info(all_devices[devId]['cpu_usage'])
 
         for clustId in self.cluster_info.keys():
             num = float(self.cluster_info[clustId]["count"])
