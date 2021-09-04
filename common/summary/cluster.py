@@ -49,7 +49,7 @@ def cluster_mat(matList, xKeySpace, yKeySpace):
             distMat[i,j] = dist
             distMat[j,i] = dist
 
-    model = DBSCAN(eps=1.0, min_samples=2,
+    model = DBSCAN(eps=1.13, min_samples=2,
                    metric='precomputed')
     yhat = model.fit_predict(distMat)
 

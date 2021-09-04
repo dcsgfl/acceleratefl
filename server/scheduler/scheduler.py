@@ -102,7 +102,8 @@ class Scheduler:
         #print(clusters)
         #print(probs)
 
-        count = len(clusters)
+        #count = len(clusters)
+        count = client_threshold
         for i in range(count):
 
             idx = choices(range(len(clusters)), weights=probs)[0]
