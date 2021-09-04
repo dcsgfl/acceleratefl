@@ -2,6 +2,7 @@ import os
 import sys
 import numpy as np
 import copy
+from collections import Counter
 
 pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', '..', 'common','summary')
 sys.path.append(pwd)
@@ -64,7 +65,7 @@ class PXYSched(Scheduler):
             num = float(self.cluster_info[clustId]["count"])
             self.cluster_info[clustId]["prop"] = num / float(len(dev_keys))
 
-        logging.info("CLUSTERS ASSIGNED: " + str(set(dev_clusters)))
+        logging.info("CLUSTERS ASSIGNED: " + str(Counter(dev_clusters)))
 
 
     def select_worker_instances(self, available_devices, client_threshold):

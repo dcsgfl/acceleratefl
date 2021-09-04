@@ -119,7 +119,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         if self.n_available_devices == self.n_device_summaries:
             self.scheduler.notify_worker_update(self.available_devices)        
         self.unlock()
-        logging.info('Data summary: ' + str(request.summary))
+        #logging.info('Data summary: ' + str(request.summary))
 
         #while True:
         #    self.lock()
