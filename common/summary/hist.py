@@ -90,6 +90,8 @@ class HistSummary(object):
         return json.dumps(self.values)
 
     def fromJson(self, jsonStr):
+        if type(jsonStr) != str :
+            print(type(jsonStr), jsonStr)
         self.values = json.loads(jsonStr)
 
     def __str__(self):

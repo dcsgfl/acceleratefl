@@ -88,9 +88,6 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     
     def HeartBeat(self, request, context):
         self.lock()
-        np.random.seed(int(request.id))
-        usage =  np.random.beta(1, 10) * 50
-        self.available_devices[request.id]['cpu_usage'] = usage
         self.available_devices[request.id]['ncpus'] = request.ncpus
         self.available_devices[request.id]['load'] = request.load15
         self.available_devices[request.id]['virtual_mem'] = request.virtual_mem
@@ -113,6 +110,9 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     def SendSummary(self, request, context):
 
         self.lock()
+        np.random.seed(int(request.id))
+        usage =  np.random.beta(1, 10) * 100
+        self.available_devices[request.id]['cpu_usage'] = usage
         self.available_devices[request.id]['summary'] = request.summary
         self.available_devices[request.id]['summary_type'] = request.type
         self.n_device_summaries += 1
@@ -392,7 +392,7 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--scheduler',
         type = str,
-        default = 'RNDSched',
+        default = 'PXYSched',
         help = 'Scheduler type',
     )
 
