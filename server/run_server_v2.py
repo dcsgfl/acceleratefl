@@ -209,7 +209,6 @@ def evaluate_model_on_worker(model_identifier, worker, dataset_key, model, nr_bi
 
     if print_target_hist:
         print("Target histogram: ", hist_target)
-    # print(worker.id, "Average loss: ",test_loss,", Accuracy: ",100.0 * correct / len_dataset, ", total: ", len_dataset, "correct: ", correct)
     return(correct, len_dataset)
 
 # set connection to all available devices. Useful for evaluating model on all devices

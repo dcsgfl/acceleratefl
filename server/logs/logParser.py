@@ -1,13 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-file = open("pyscheduler.log")
+file = open("rnd_beta.log")
 
 content = file.readlines()
 
-lineIdx = 30
-lineInc = 31
-
+lineIdx = 0
 nLines = len(content)
 
 epoch = []
@@ -15,15 +13,15 @@ accuracy = []
 times = []
 while (lineIdx < nLines):
     currLine = content[lineIdx]
-    lineIdx += lineInc
     splitLine = currLine.split()
     epoch.append(float(splitLine[1]))
     accuracy.append(float(splitLine[3]))
-    times.append(float(splitLine[5]))
+    times.append(float(splitLine[17]))
+    lineIdx += 1
 
 cumtimes = np.cumsum(times)
 print(max(cumtimes))
-x_ticks = np.arange(0, 190, 5)
+x_ticks = np.arange(0, 180, 5)
 y_ticks = np.arange(0, 1, 0.1)
 plt.plot(epoch, accuracy)
 plt.xticks(x_ticks)
@@ -33,7 +31,7 @@ plt.ylabel('Accuracy')
 plt.title('Accuracy vs Epoch')
 plt.show()
 
-x_ticks = np.arange(0, 13500, 1000)
+x_ticks = np.arange(0, max(cumtimes), 1000)
 y_ticks = np.arange(0, 1, 0.1)
 plt.plot(cumtimes, accuracy)
 plt.xticks(x_ticks)
