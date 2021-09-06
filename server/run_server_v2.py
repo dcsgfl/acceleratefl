@@ -47,7 +47,7 @@ from schedulerFactory import SchedulerFactory as schedftry
 LOCK_TRACE = False
 
 np.random.seed(1111)
-usage_array = list(np.random.beta(1, 10, 100) * 100)
+usage_array = list(np.random.beta(2, 8, 40) * 100)
 usage_iter = 0
 
 class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
