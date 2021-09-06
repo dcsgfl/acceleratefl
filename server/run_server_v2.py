@@ -46,6 +46,10 @@ from schedulerFactory import SchedulerFactory as schedftry
 
 LOCK_TRACE = False
 
+np.random.seed(1111)
+usage_array = list(np.random.beta(1, 10, 100) * 100)
+usage_iter = 0
+
 class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     
     def __init__(self, args):
@@ -109,10 +113,12 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
 
     def SendSummary(self, request, context):
 
+        global usage_array, usage_iter
+
         self.lock()
-        np.random.seed(int(request.id))
-        usage =  np.random.beta(1, 10) * 100
+        usage = usage_array[usage_iter]
         self.available_devices[request.id]['cpu_usage'] = usage
+        usage_iter += 1
         self.available_devices[request.id]['summary'] = request.summary
         self.available_devices[request.id]['summary_type'] = request.type
         self.n_device_summaries += 1
