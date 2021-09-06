@@ -7,7 +7,6 @@ import argparse
 import threading
 import random
 import copy
-
 import numpy as np
 
 import torch
@@ -48,6 +47,8 @@ from schedulerFactory import SchedulerFactory as schedftry
 LOCK_TRACE = False
 
 np.random.seed(1111)
+usage_array = list(np.random.beta(2, 8, 40) * 100)
+usage_iter = 0
 
 class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     
@@ -79,8 +80,6 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
             self.available_devices[id]['id'] = id
             self.available_devices[id]['ip'] = request.ip
             self.available_devices[id]['flport'] = request.flport
-            self.available_devices[id]['latency'] = np.random.beta(1, 10) * 50
-            self.available_devices[id]['stat_util'] = 0.0
             self.n_available_devices += 1
         self.unlock()
 
@@ -93,11 +92,12 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     
     def HeartBeat(self, request, context):
         self.lock()
-        self.available_devices[request.id]['cpu_usage'] = request.cpu_usage
         self.available_devices[request.id]['ncpus'] = request.ncpus
         self.available_devices[request.id]['load'] = request.load15
         self.available_devices[request.id]['virtual_mem'] = request.virtual_mem
         self.available_devices[request.id]['battery'] = request.battery
+        if "loss" not in self.available_devices[request.id].keys():
+            self.available_devices[request.id]['loss'] = 1.0
         self.unlock()
 
         # logging.info(request.id + ': [cpu_usage: ' + str(request.cpu_usage) +
@@ -113,18 +113,19 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
 
     def SendSummary(self, request, context):
 
+        global usage_array, usage_iter
+
         self.lock()
+        usage = usage_array[usage_iter]
+        self.available_devices[request.id]['cpu_usage'] = usage
+        usage_iter += 1
         self.available_devices[request.id]['summary'] = request.summary
         self.available_devices[request.id]['summary_type'] = request.type
-        n_train_data = 0
-        for labels in request.summary.keys():
-            n_train_data += request.summary[labels]
-        self.available_devices[request.id]['n_train'] = n_train_data
         self.n_device_summaries += 1
         if self.n_available_devices == self.n_device_summaries:
             self.scheduler.notify_worker_update(self.available_devices)        
         self.unlock()
-        logging.info('Data summary: ' + str(request.summary))
+        #logging.info('Data summary: ' + str(request.summary))
 
         #while True:
         #    self.lock()
@@ -152,7 +153,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
 def loss_fn(pred, target):
     return F.nll_loss(input=pred, target=target)
 
-async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, lr, dataset):
+async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, lr, dataset, usage):
     """
     Send the model to the worker and fit the model on the worker's training data.
 
@@ -180,19 +181,14 @@ async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, 
         optimizer="SGD",
         optimizer_args={"lr": lr},
     )
-    base_latency = 45
-    np.random.seed(int(worker.id))
-    latency =  base_latency + np.random.beta(1, 10) * 50
-    fit_start_time = time.time()
-    await asyncio.sleep(latency)
-    fit_end_time = time.time()
-    
+    base_latency = 45.0
+    latency =  base_latency + usage
+
     train_config.send(worker)
     loss = await worker.async_fit(dataset_key=dataset + '_TRAIN', return_ids=[0])      # TODO: add deadline here
     model = train_config.model_ptr.get().obj
     
-    
-    fit_time = fit_end_time - fit_start_time
+    fit_time = latency
 
     return worker.id, model, loss, fit_time
 
@@ -214,7 +210,7 @@ def evaluate_model_on_worker(model_identifier, worker, dataset_key, model, nr_bi
     if print_target_hist:
         print("Target histogram: ", hist_target)
     # print(worker.id, "Average loss: ",test_loss,", Accuracy: ",100.0 * correct / len_dataset, ", total: ", len_dataset, "correct: ", correct)
-    return(correct, len_dataset, test_loss)
+    return(correct, len_dataset)
 
 # sets up connection only if required. This means for evaluation, only a selected set of devices are used
 # def set_worker_conn(hook, available_devices, previous_worker_instances, verbose):
@@ -300,7 +296,8 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                     batch_size=batch_size,    # batch_size_list[worker.id],
                     max_nr_batches=max_fed_epoch,
                     lr=learning_rate,
-                    dataset= dataset
+                    dataset= dataset,
+                    usage= available_devices[devid]['cpu_usage']
                 )
                 for devid in selected_worker_instances #if batch_size_list[worker.id]>0
             ]
@@ -331,7 +328,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
             _total=0
             eval_start_time = time.time()
             for devid in available_instances:
-                correct, total, loss=evaluate_model_on_worker(        # test accuracy
+                correct, total=evaluate_model_on_worker(        # test accuracy
                     model_identifier="Federated model",
                     worker=available_instances[devid],
                     dataset_key=dataset + "_TEST",
@@ -341,11 +338,10 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                     device="cpu",
                     print_target_hist=False,
                 )
-                devcentral.lock("loss update")     
-                devcentral.available_devices['loss'] = loss
-                devcentral.unlock()
                 _correct+=correct
                 _total+=total
+                devcentral.available_devices[devid]["loss"] = 1.0 - (float(correct) / float(total))
+
             eval_end_time = time.time()
             print("EPOCH:", curr_round, " AVG_ACCURACY: ",_correct/_total,"#WORKERS: ", len(selected_worker_instances),  " SCHED TIME: ", schedule_end_time - schedule_start_time, " TRAIN TIME: ", train_end_time - train_start_time, " TOTAL TRAIN: ", schedule_end_time - schedule_start_time + train_end_time - train_start_time, " FIT TIME: ", avg_fit_time,  " EVAL TIME: ", eval_end_time - eval_start_time)
 
@@ -402,7 +398,7 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--scheduler',
         type = str,
-        default = 'PYSched',
+        default = 'RNDSched',
         help = 'Scheduler type',
     )
 
@@ -452,7 +448,7 @@ if __name__ == '__main__':
     grpcservice.start()
 
     # train and eval models 
-    client_threshold = 3
+    client_threshold = 10
     asyncio.get_event_loop().run_until_complete(
         train_and_eval(args, devcentral, client_threshold, args.verbose)
     )
