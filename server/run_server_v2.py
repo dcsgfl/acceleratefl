@@ -212,29 +212,6 @@ def evaluate_model_on_worker(model_identifier, worker, dataset_key, model, nr_bi
     # print(worker.id, "Average loss: ",test_loss,", Accuracy: ",100.0 * correct / len_dataset, ", total: ", len_dataset, "correct: ", correct)
     return(correct, len_dataset)
 
-# sets up connection only if required. This means for evaluation, only a selected set of devices are used
-# def set_worker_conn(hook, available_devices, previous_worker_instances, verbose):
-#     worker_instances = []
-#     for devid in available_devices:
-#         if previous_worker_instances:
-#             if devid in previous_worker_instances.keys():
-#                 worker_instances.append(previous_worker_instances[devid])
-#             else:    
-#                 kwargs_websocket = {'host' : available_devices[devid]['ip'], 'hook' : hook, 'verbose' : verbose}
-#                 clientWorker = WebsocketClientWorker(id = devid, port = available_devices[devid]['flport'], **kwargs_websocket)
-#                 clientWorker.clear_objects_remote()
-#                 worker_instances.append(clientWorker)
-#                 previous_worker_instances[devid] = clientWorker
-#         else:
-#             kwargs_websocket = {'host' : available_devices[devid]['ip'], 'hook' : hook, 'verbose' : verbose}
-#             clientWorker = WebsocketClientWorker(id = devid, port = available_devices[devid]['flport'], **kwargs_websocket)
-#             clientWorker.clear_objects_remote()
-#             worker_instances.append(clientWorker)
-#             previous_worker_instances[devid] = clientWorker
-        
-    
-#     return worker_instances
-
 # set connection to all available devices. Useful for evaluating model on all devices
 def set_worker_conn(hook, available_devices, available_instances, verbose):
     for devid in available_devices:
