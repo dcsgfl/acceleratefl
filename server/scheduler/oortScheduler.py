@@ -10,12 +10,11 @@ class OORTSched(Scheduler):
         selected_devices = {}
         device_keys = list(available_devices.keys())
         device_utils = dict((key, available_devices[key]['util']) for key  in device_keys)
-        sorted_device_by_util_asc = sorted(device_utils.items(), key=operator.itemgetter(1))
-        sorted_device_by_util_desc = sorted_device_by_util_asc.reverse()
+        sorted_device_by_util= sorted(device_utils.items(), key=operator.itemgetter(1), reverse=True)
         n_selected_devices = 0
-        for key in sorted_device_by_util_desc:
+        for rec in sorted_device_by_util:
             n_selected_devices += 1
-            selected_devices[key] = available_devices[key].copy()
+            selected_devices[rec[0]] = available_devices[rec[0]].copy()
             if n_selected_devices == client_threshold:
                 break
         return(selected_devices)
