@@ -6,7 +6,7 @@ file = open("rnd_beta.log")
 content = file.readlines()
 
 lineIdx = 0
-nLines = len(content)
+nLines = 170
 
 epoch = []
 accuracy = []
