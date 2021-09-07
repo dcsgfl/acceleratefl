@@ -322,7 +322,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                 loss = 1.0 - (float(correct) / float(total))
                 global_util = 0.0
                 if expected_fit_time < fit_time:
-                    global_util = 1.0 * alpha * expected_fit_time / fit_time
+                    global_util = (expected_fit_time / fit_time) ** alpha
                 devcentral.available_devices[devid]["util"] = loss * global_util
 
             eval_end_time = time.time()
