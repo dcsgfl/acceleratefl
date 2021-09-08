@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-file = open("rnd_beta.log")
+file = open("oort_beta.log")
 
 content = file.readlines()
 
 lineIdx = 0
-nLines = len(content)
+nLines = 170
 
 epoch = []
 accuracy = []
