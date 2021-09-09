@@ -298,7 +298,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
         traced_model = utils.federated_avg(models)
 
         expected_fit_time = 65.0
-        alpha = 5.0
+        alpha = 10.0
 
         test_models=True    # eval after every round
         if test_models:
