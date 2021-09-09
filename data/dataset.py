@@ -36,7 +36,7 @@ class Dataset:
             sys.exit("Incorrect flag for get_data")
 
         selected_noise_idxs = []
-        noise_percents = [0.05, 0.03, 0.01]
+        noise_percents = [0.2, 0.15, 0.05]
         for p in noise_percents:
             # select a random noise label and remove it from existing noise list 
             selected_noise_label = random.choice(noise_labels)
@@ -50,7 +50,7 @@ class Dataset:
 
         # get index corresponding to my data label and take 90%
         all_my_label_idxs = tuple(np.where(scenario_index[my_label])[0])
-        num_idxs = int(len(all_my_label_idxs) * 0.9)
+        num_idxs = int(len(all_my_label_idxs) * 0.6)
         pruned_my_label_idxs = all_my_label_idxs[:num_idxs]
 
         # concatenate noise idx and my label index to generate final set of idx

@@ -398,7 +398,7 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--scheduler',
         type = str,
-        default = 'PXYSched',
+        default = 'RNDSched',
         help = 'Scheduler type',
     )
 
