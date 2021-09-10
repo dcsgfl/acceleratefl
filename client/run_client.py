@@ -218,7 +218,7 @@ def parse_arguments(args = sys.argv[1:]):
         '--summary',
         '-s',
         type=str,
-        default='pxy',
+        default='rnd',
         help='data summary to send: --summary py'
     )
 
