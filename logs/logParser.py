@@ -1,42 +1,98 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-file = open("rnd_dist.log")
+# rndfh = open("rnd_dist.log")
+# pyfh = open("py_dist.log")
+# pxyfh = open("pxy_dist.log")
+# oortfh = open("oort_dist.log")
 
-content = file.readlines()
+rndfh = open("rnd_beta.log")
+pyfh = open("py_beta.log")
+pxyfh = open("pxy_beta.log")
+oortfh = open("oort_beta_a15.log")
+
+rndcontent = rndfh.readlines()
+pycontent = pyfh.readlines()
+pxycontent = pxyfh.readlines()
+oortcontent = oortfh.readlines()
 
 lineIdx = 0
 nLines = 170
 
-epoch = []
-accuracy = []
-times = []
+rndepoch = []
+rndaccuracy = []
+rndtimes = []
+
+pyepoch = []
+pyaccuracy = []
+pytimes = []
+
+pxyepoch = []
+pxyaccuracy = []
+pxytimes = []
+
+oortepoch = []
+oortaccuracy = []
+oorttimes = []
 while (lineIdx < nLines):
-    currLine = content[lineIdx]
+    currLine = rndcontent[lineIdx]
     splitLine = currLine.split()
-    epoch.append(float(splitLine[1]))
-    accuracy.append(float(splitLine[3]))
-    times.append(float(splitLine[17]))
+    rndepoch.append(float(splitLine[1]))
+    rndaccuracy.append(float(splitLine[3]))
+    rndtimes.append(float(splitLine[17]))
+
+    currLine = pycontent[lineIdx]
+    splitLine = currLine.split()
+    pyepoch.append(float(splitLine[1]))
+    pyaccuracy.append(float(splitLine[3]))
+    pytimes.append(float(splitLine[17]))
+
+    currLine = pxycontent[lineIdx]
+    splitLine = currLine.split()
+    pxyepoch.append(float(splitLine[1]))
+    pxyaccuracy.append(float(splitLine[3]))
+    pxytimes.append(float(splitLine[17]))
+
+    currLine = oortcontent[lineIdx]
+    splitLine = currLine.split()
+    oortepoch.append(float(splitLine[1]))
+    oortaccuracy.append(float(splitLine[3]))
+    oorttimes.append(float(splitLine[17]))
+
     lineIdx += 1
 
-cumtimes = np.cumsum(times)
-print(max(cumtimes))
-x_ticks = np.arange(0, 180, 5)
+rndctime = np.cumsum(rndtimes)
+pyctime = np.cumsum(pytimes)
+pxyctime = np.cumsum(pxytimes)
+oortctime = np.cumsum(oorttimes) 
+maxtime = max(max(rndctime), max(pyctime), max(pxyctime), max(oortctime))
+
+print(max(rndctime), max(pyctime), max(pxyctime), max(oortctime))
+
+x_ticks = np.arange(0, 180, 10)
 y_ticks = np.arange(0, 1, 0.1)
-plt.plot(epoch, accuracy)
+plt.plot(rndepoch, rndaccuracy, label='random')
+plt.plot(rndepoch, pyaccuracy, label = 'py')
+plt.plot(rndepoch, pxyaccuracy, label ='pxy')
+plt.plot(rndepoch, oortaccuracy, label = 'oort')
 plt.xticks(x_ticks)
 plt.xlabel('Epochs')
 plt.yticks(y_ticks)
 plt.ylabel('Accuracy')
 plt.title('Accuracy vs Epoch')
+plt.legend()
 plt.show()
 
-x_ticks = np.arange(0, max(cumtimes), 1000)
+x_ticks = np.arange(0, maxtime, 1000)
 y_ticks = np.arange(0, 1, 0.1)
-plt.plot(cumtimes, accuracy)
+plt.plot(rndctime, rndaccuracy, label = 'random')
+plt.plot(pyctime, pyaccuracy, label = 'py')
+plt.plot(pxyctime, pxyaccuracy, label = 'pxy')
+plt.plot(oortctime, oortaccuracy, label = 'oort')
 plt.xticks(x_ticks)
 plt.xlabel('Time taken (sec)')
 plt.yticks(y_ticks)
 plt.ylabel('Accuracy')
 plt.title('Accuracy vs Time taken')
+plt.legend()
 plt.show()
