@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-file = open("rnd_dist.log")
+file = open("py_13_1.log")
 
 content = file.readlines()
 
