@@ -19,11 +19,13 @@ class Dataset:
     
     def generate_data(self, id, flag):
         # associate a random constant label with current caller
-        random.seed(1111 + int(id))
-        my_label = random.randint(self.min_label, self.max_label)
+        random.seed(int(id))
+        minlabel = self.min_label
+        maxlabel = minlabel + 4
+        my_label = random.randint(minlabel, maxlabel)
 
         # remove my lable from available ones for adding noise
-        noise_labels = self.unique_labels.copy()
+        noise_labels = [*range(minlabel, maxlabel + 1, 1)]
         noise_labels.remove(my_label)
 
         # For maintaining same distribution across train and test, same noise percent should be added
@@ -36,7 +38,7 @@ class Dataset:
             sys.exit("Incorrect flag for get_data")
 
         selected_noise_idxs = []
-        noise_percents = [0.2, 0.15, 0.05]
+        noise_percents = [0.12, 0.6, 0.07]
         for p in noise_percents:
             # select a random noise label and remove it from existing noise list 
             selected_noise_label = random.choice(noise_labels)
