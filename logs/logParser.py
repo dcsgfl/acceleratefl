@@ -13,10 +13,11 @@ import matplotlib.pyplot as plt
 
 rndfh = open("rnd_13_1.log")
 pyfh = open("py_13_1.log")
+pxyfh = open("pxy_13_1.log")
 
 rndcontent = rndfh.readlines()
 pycontent = pyfh.readlines()
-# pxycontent = pxyfh.readlines()
+pxycontent = pxyfh.readlines()
 # oortcontent = oortfh.readlines()
 
 lineIdx = 0
@@ -30,9 +31,9 @@ pyepoch = []
 pyaccuracy = []
 pytimes = []
 
-# pxyepoch = []
-# pxyaccuracy = []
-# pxytimes = []
+pxyepoch = []
+pxyaccuracy = []
+pxytimes = []
 
 # oortepoch = []
 # oortaccuracy = []
@@ -50,11 +51,11 @@ while (lineIdx < nLines):
     pyaccuracy.append(float(splitLine[3]))
     pytimes.append(float(splitLine[17]))
 
-    # currLine = pxycontent[lineIdx]
-    # splitLine = currLine.split()
-    # pxyepoch.append(float(splitLine[1]))
-    # pxyaccuracy.append(float(splitLine[3]))
-    # pxytimes.append(float(splitLine[17]))
+    currLine = pxycontent[lineIdx]
+    splitLine = currLine.split()
+    pxyepoch.append(float(splitLine[1]))
+    pxyaccuracy.append(float(splitLine[3]))
+    pxytimes.append(float(splitLine[17]))
 
     # currLine = oortcontent[lineIdx]
     # splitLine = currLine.split()
@@ -66,19 +67,19 @@ while (lineIdx < nLines):
 
 rndctime = np.cumsum(rndtimes)
 pyctime = np.cumsum(pytimes)
-# pxyctime = np.cumsum(pxytimes)
+pxyctime = np.cumsum(pxytimes)
 # oortctime = np.cumsum(oorttimes) 
 # maxtime = max(max(rndctime), max(pyctime), max(pxyctime), max(oortctime))
-maxtime = max(max(rndctime), max(pyctime))
+maxtime = max(max(rndctime), max(pyctime), max(pxyctime))
 
 # print(max(rndctime), max(pyctime), max(pxyctime), max(oortctime))
-print(max(rndctime), max(pyctime))
+print(max(rndctime), max(pyctime), max(pxyctime))
 
 x_ticks = np.arange(0, 180, 10)
 y_ticks = np.arange(0, 1, 0.1)
 plt.plot(rndepoch, rndaccuracy, label='random')
 plt.plot(rndepoch, pyaccuracy, label = 'py')
-# plt.plot(rndepoch, pxyaccuracy, label ='pxy')
+plt.plot(rndepoch, pxyaccuracy, label ='pxy')
 # plt.plot(rndepoch, oortaccuracy, label = 'oort')
 plt.xticks(x_ticks)
 plt.xlabel('Epochs')
@@ -92,7 +93,7 @@ x_ticks = np.arange(0, maxtime, 500)
 y_ticks = np.arange(0, 1, 0.1)
 plt.plot(rndctime, rndaccuracy, label = 'random')
 plt.plot(pyctime, pyaccuracy, label = 'py')
-# plt.plot(pxyctime, pxyaccuracy, label = 'pxy')
+plt.plot(pxyctime, pxyaccuracy, label = 'pxy')
 # plt.plot(oortctime, oortaccuracy, label = 'oort')
 plt.xticks(x_ticks)
 plt.xlabel('Time taken (sec)')

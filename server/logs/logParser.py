@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-file = open("py_13_1.log")
+file = open("pxy_13_1.log")
 
 content = file.readlines()
 
