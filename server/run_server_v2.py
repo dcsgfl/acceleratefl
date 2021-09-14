@@ -46,8 +46,28 @@ from schedulerFactory import SchedulerFactory as schedftry
 
 LOCK_TRACE = False
 
-np.random.seed(1111)
-usage_array = list(np.random.beta(2, 8, 40) * 100)
+def generateDelays(n=30):
+    np.random.seed(1111)
+    delays = []
+
+    # fast, medium, slow, very slow probabilities
+    probs = np.array([0.6, 0.2, 0.15, 0.5])
+    samples = np.random.multinomial(1, probs, n)
+
+    for sample in samples:
+        draw = np.array([np.random.uniform( 0.01,  5.0),
+                         np.random.uniform( 5.00, 15.0),
+                         np.random.uniform(15.00, 30.0),
+                         np.random.uniform(30.00, 60.0)])
+
+        delay_arr = np.multiply(sample, draw)
+        delay_idx = np.nonzero(delay_arr)
+        delay = float(delay_arr[delay_idx])
+        delays.append(delay)
+
+    return delays
+
+usage_array = generateDelays(40)
 usage_iter = 0
 
 class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
