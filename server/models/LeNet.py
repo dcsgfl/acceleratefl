@@ -44,7 +44,7 @@ class LeNet(nn.Module):
         x = func.relu(self.fc1(x))
         x = func.relu(self.fc2(x))
         x = self.fc3(x)
-        return x
+        return func.log_softmax(x, dim=1)
 
 # class LeNet(nn.Module):
 #     def __init__(self):

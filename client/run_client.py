@@ -165,7 +165,10 @@ def start_websocker_server_worker(id, host, port, dataset, datacls, hook, verbos
     dataset_train = sy.BaseDataset(
         data = train_data,
         targets = train_targets,
-        transform = transforms.Compose([transforms.ToTensor()])
+        transform = transforms.Compose([
+                                            transforms.ToTensor(), 
+                                            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+                                    ])
     )
     server.add_dataset(dataset_train, key = dataset + '_TRAIN')
 
@@ -174,7 +177,10 @@ def start_websocker_server_worker(id, host, port, dataset, datacls, hook, verbos
     dataset_test = sy.BaseDataset(
         data = test_data,
         targets = test_targets,
-        transform = transforms.Compose([transforms.ToTensor()])
+        transform = transforms.Compose([
+                                            transforms.ToTensor(),
+                                            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+                                    ])
     )
     server.add_dataset(dataset_test, key = dataset + '_TEST')
 
