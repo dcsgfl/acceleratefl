@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-file = open("oort_dist.log")
+file = open("cifar10_rnd.log")
 
 content = file.readlines()
 
