@@ -74,35 +74,6 @@ class PYSched(Scheduler):
 
         return self._schedule_clusters(self.cluster_info, available_devices, client_threshold)
 
-        # This is a little slow... (n^2) but just moving on for now
-        #selected_devices = {}
-        #for clusterId in self.cluster_info.keys(): # For each identified cluster
-
-        #    bestDev = {}
-        #    for devId in available_devices.keys():  # For each device in that cluster
-
-        #        curDev = available_devices[devId].copy()
-    
-        #        if curDev['cluster'] == clusterId:
-
-        #            if len(bestDev.keys()) == 0:
-                        # This is the first device in cluster
-        #                bestDev = curDev.copy()
-        #            elif curDev["cpu_usage"] < bestDev["cpu_usage"]:
-                        # Is this device any faster?
-        #                bestDev = curDev.copy()
-
-                # TODO: these keys are also available to us...
-                #available_devices[request.id]['cpu_usage']
-                #available_devices[request.id]['ncpus']
-                #available_devices[request.id]['load']
-                #available_devices[request.id]['virtual_mem']
-                #available_devices[request.id]['battery']
-
-        #    selected_devices[bestDev["id"]] = bestDev.copy()
-
-        #return selected_devices
-
     def notify_worker_update(self, all_devices):
         self.do_clustering(all_devices)
 

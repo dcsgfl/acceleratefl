@@ -42,6 +42,7 @@ class Scheduler:
     * Assumes self.cluster_ids contains the set of valid ids
     """
     def _schedule_clusters(self, clustInfo, available_devices, client_threshold):
+
         closs = {}
         cdevs = {}
 
