@@ -115,11 +115,28 @@ def send_summary(args, datacls):
         for label in labelSpace:
             histInput[label] = []
 
-        for idx in range(len(train_y)):
-            label = str(train_y[idx])
-            xarr = train_x[idx,:].flatten()
-            sd = list(map(str, xarr))
-            histInput[label] += sd
+        if args.dataset.upper() == "CIFAR10":
+
+            for idx in range(len(train_y)):
+                xarr = train_x[idx,:].flatten()
+                counts, labels = np.histogram(xarr, bins=20, range=(0,1))
+
+                sd = []
+                for idx, numericLabel in enumerate(labels[:-1]):
+                    count = counts[idx]
+                    lab = "b" + str(numericLabel)
+                    sd = sd + count*[lab]
+
+                histInput[label] += sd
+
+        else:
+
+            for idx in range(len(train_y)):
+                label = str(train_y[idx])
+                xarr = train_x[idx,:].flatten()
+                sd = list(map(str, xarr))
+                histInput[label] += sd
+
 
         for label in labelSpace:
             hip = histInput[label]
