@@ -19,6 +19,7 @@ from random import randrange
 
 from hist import HistSummary
 from pyScheduler import PYSched
+from tiflScheduler import TIFLSched
 
 def getRandomConvexCombination(dim):
     return [0.25, 0.25, 0.25, 0.25] # todo
@@ -37,22 +38,43 @@ def getDevice(dev_id, numDataPoints, keySpaceList):
 
     dev["id"] = dev_id
     dev["summary"] = histSummary.toJson()
-    dev["cpu_usage"] = randrange(100)
+    dev["cpu_usage"] = float(randrange(100)) / 100.0
+    dev["loss"] = 1.0
 
     return dev
 
 keySpace = ['0','1','2','3']
 
 devs = {}
-devs["dev_0"] = getDevice("dev_0", 1000, keySpace)
-devs["dev_1"] = getDevice("dev_1", 1000, keySpace)
-devs["dev_2"] = getDevice("dev_2", 1000, keySpace)
-devs["dev_3"] = getDevice("dev_3", 1000, keySpace)
+devs["dev_0"]  = getDevice("dev_0", 1000, keySpace)
+devs["dev_1"]  = getDevice("dev_1", 1000, keySpace)
+devs["dev_2"]  = getDevice("dev_2", 1000, keySpace)
+devs["dev_3"]  = getDevice("dev_3", 1000, keySpace)
+devs["dev_4"]  = getDevice("dev_3", 1000, keySpace)
+devs["dev_5"]  = getDevice("dev_3", 1000, keySpace)
+devs["dev_6"]  = getDevice("dev_3", 1000, keySpace)
+devs["dev_7"]  = getDevice("dev_3", 1000, keySpace)
+devs["dev_8"]  = getDevice("dev_3", 1000, keySpace)
+devs["dev_9"]  = getDevice("dev_3", 1000, keySpace)
+devs["dev_10"] = getDevice("dev_3", 1000, keySpace)
+devs["dev_11"] = getDevice("dev_3", 1000, keySpace)
 
+print("PY TEST")
 #print(devs)
 py = PYSched()
 py.notify_worker_update(devs)
 
-ignored_thresh = 0
+ignored_thresh = 2
 selected_devs = py.select_worker_instances(devs, ignored_thresh)
+print(selected_devs)
+
+print("TIFL TEST")
+tifl = TIFLSched()
+tifl.notify_worker_update(devs)
+for key in devs.keys():
+    print(devs[key])
+
+print()
+ignored_thresh = 2
+selected_devs = tifl.select_worker_instances(devs, ignored_thresh)
 print(selected_devs)
