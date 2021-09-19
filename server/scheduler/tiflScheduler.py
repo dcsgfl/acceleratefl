@@ -40,11 +40,15 @@ class TIFLSched(Scheduler):
 
         # OK, now, select a tier
         idx = -1
+        weights = np.copy(self.tier_probs)
         while True:
 
-            idx = choices(range(self.n_tiers), weights=self.tier_probs)[0]
+            idx = choices(range(self.n_tiers), weights=weights)[0]
             if self.tier_credits[idx] > 0:
                 break
+
+            # Remove this option
+            weights[idx] = 0.0
 
         numDevs = int(min(self.tier_counts[idx], client_threshold))
         self.tier_credits[idx] -= 1
