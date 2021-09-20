@@ -1,10 +1,11 @@
 import os
-import tarfile
-import shutil
-import numpy as np
+import json
+import torch
 
+import numpy as np
 import urllib.parse
 
+from collections import defaultdict
 from urllib.request import urlretrieve
 from dataset import Dataset
 
@@ -16,96 +17,88 @@ class FEMNIST(Dataset):
     def __init__(self) -> None:
         super().__init__()
         self.path = os.path.join(DATADIR, 'femnist')
-        self.url = 'https://www.cs.toronto.edu/~kriz/'
-        self.tar = 'cifar-10-binary.tar.gz'
-        self.files = [  'cifar-10-batches-bin/data_batch_1.bin',
-                        'cifar-10-batches-bin/data_batch_2.bin',
-                        'cifar-10-batches-bin/data_batch_3.bin',
-                        'cifar-10-batches-bin/data_batch_4.bin',
-                        'cifar-10-batches-bin/data_batch_5.bin',
-                        'cifar-10-batches-bin/test_batch.bin']
+        self.url = 'http://www-users.cselabs.umn.edu/~wang8662/'
+        self.zip = 'femnist.zip'
+        self.train_dir = os.path.join(self.path, 'train')
+        self.test_dir = os.path.join(self.path, 'test')
                         
     class Factory:
         def get(self):
             return FEMNIST()
     
+    def read_dir(self, data_dir):
+        clients = []
+        groups = []
+        data = defaultdict(lambda: None)
+        files = os.listdir(data_dir)
+        files = [f for f in files if f.endswith('.json')]
+        for f in files:
+            file_path = os.path.join(data_dir, f)
+            with open(file_path, 'r') as inf:
+                cdata = json.load(inf)
+            clients.extend(cdata['users'])
+            if 'hierarchies' in cdata:
+                groups.extend(cdata['hierarchies'])
+            data.update(cdata['user_data'])
+        clients = list(sorted(data.keys()))
+        return clients, groups, data
+    
+    def read_data(self,):
+        '''parses data in given train and test data directories
+        assumes:
+        - the data in the input directories are .json files with
+            keys 'users' and 'user_data'
+        - the set of train set users is the same as the set of test set users
+        Return:
+            clients: list of client ids
+            groups: list of group ids; empty list if none found
+            train_data: dictionary of train data
+            test_data: dictionary of test data
+        '''
+        train_clients, train_groups, train_data = self.read_dir(self.train_dir)
+        test_clients, test_groups, test_data = self.read_dir(self.test_dir)
+        assert train_clients == test_clients
+        assert train_groups == test_groups
+        return train_clients, train_groups, train_data, test_data
+
     def download_data(self):
         # Create cifar10 directory is non-existent
         os.makedirs(self.path, exist_ok=True)
 
-        # Download cifar10 tar file is non-existent
-        if self.tar not in os.listdir(self.path):
-            urlretrieve(urllib.parse.urljoin(self.url, self.tar), os.path.join(self.path, self.tar))
-            print('Downloaded ', self.tar, ' from ', self.url)
+        # Download femnist tar file is non-existent
+        if self.zip not in os.listdir(self.path):
+            urlretrieve(urllib.parse.urljoin(self.url, self.zip), os.path.join(self.path, self.zip))
+            res=os.popen('unzip '+ os.path.join(self.path, self.zip) +' -d '+ self.path).read()
+            print('Downloaded ', self.zip, ' from ', self.url)
         
-        # Retrieve train and test data from tar file
-        with tarfile.open(os.path.join(self.path, self.tar)) as tarobj:
-            # Each file has 10000 color (32*32*3) images and 10000 labels
-            fsize = 10000 * (32 * 32 * 3) + 10000
-
-            # 6 files with pixel values in range(0, 255): uint8
-            imgbin = np.zeros(fsize * 6, dtype='uint8')
-
-            # Get the name of 6 binary files from tar object
-            binNames = [file for file in tarobj if file.name in self.files]
-
-            # To order train and test data, sort the binNames based on name
-            binNames.sort(key=lambda file: file.name)
-
-            for iter, file in enumerate(binNames):
-                # Handle to binary file
-                binHandle = tarobj.extractfile(file)
-
-                # Read binary data in bytes to imgbin
-                imgbin[iter * fsize : (iter + 1) * fsize] = np.frombuffer(binHandle.read(), dtype='B')
-        
-        # remove the cifar10 directory after use
-        # shutil.rmtree(self.path)
-
-        # 1 image : 3073 bytes [1(label):32*32*3(rbg)]
-        labels = imgbin[::3073]
-
-        # Remove the labels to get the pixels of all images
-        pixels = np.delete(imgbin, np.arange(0, imgbin.size, 3073))
-
-        # Convert into separate flat images (1*3072)
-        imgflat = pixels.reshape(-1, 3072).astype('float32')/255
-
-        # Convert flat image to channel * width * height followed by transpose for use by NN tensors
-        # Reference: https://towardsdatascience.com/cifar-10-image-classification-in-tensorflow-5b501f7dc77c
-        imgReshape = imgflat.reshape(-1, 3, 32, 32)
-        img = imgReshape.transpose(0, 2, 3, 1)
-
-        # Train and test data
-        self.train_x, self.train_y = img[:50000], labels[:50000]
-        self.test_x, self.test_y = img[50000:], labels[50000:]
-
-        # get unique label count
-        self.unique_labels = list(np.unique(self.train_y))
-        self.n_unique_labels = len(self.unique_labels)
-        self.min_label = min(self.unique_labels)
-        self.max_label = max(self.unique_labels)
-
-        # list of list: for both train and test
-        #           inner list: indices corresponding to a specific label
-        #           outer list: unique labels
-        self.indices_train = [[] for x in range(self.n_unique_labels)]
-        self.indices_test = [[] for x in range(self.n_unique_labels)]
-        for i in range(self.n_unique_labels):
-            self.indices_train[i] = np.isin(self.train_y, [i])
-        for i in range(self.n_unique_labels):
-            self.indices_test[i] = np.isin(self.test_y, [i])
+        self.users, self.groups, self.train_data, self.test_data = self.read_data()
 
         return True
 
     def get_training_data(self, id):
-        return super().get_training_data(id)
+        userid=self.users[id]
+        _tx=self.train_data[userid]['x']
+        
+        _ty=self.train_data[userid]['y']
+        num_of_samples = len(_ty)
+        tx = torch.tensor(_tx).reshape(num_of_samples,28,28)
+        ty = torch.tensor(_ty, dtype=torch.int64)
+        
+        return(tx, ty)
     
     def get_testing_data(self, id):
-        return super().get_testing_data(id)
+        userid=self.users[id]
+        _tx=self.test_data[userid]['x']
+        
+        _ty=self.test_data[userid]['y']
+        num_of_samples = len(_ty)
+        tx = torch.tensor(_tx).reshape(num_of_samples,28,28)
+        ty = torch.tensor(_ty, dtype=torch.int64)
+        
+        return(tx, ty)
 
 
 if __name__ == '__main__':
-    cls = CIFAR10()
+    cls = FEMNIST()
 
     cls.download_data()
