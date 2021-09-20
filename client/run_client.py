@@ -99,7 +99,7 @@ def send_summary(args, datacls):
     summaryType = args.summary.lower()
     summaryPayload = ""
 
-    if summaryType == "rnd" or summaryType == "py" or summaryType == "oort":
+    if summaryType == "rnd" or summaryType == "py" or summaryType == "oort" or summaryType == "tifl":
 
         histInput = list(map(str, train_y.tolist()))
         histSummary = HistSummary(histInput)
@@ -241,7 +241,7 @@ def parse_arguments(args = sys.argv[1:]):
         '--summary',
         '-s',
         type=str,
-        default='oort',
+        default='tifl',
         help='data summary to send: --summary py'
     )
 
