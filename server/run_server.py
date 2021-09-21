@@ -116,8 +116,12 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         self.available_devices[request.id]['load'] = request.load15
         self.available_devices[request.id]['virtual_mem'] = request.virtual_mem
         self.available_devices[request.id]['battery'] = request.battery
+        # for TiFL
         if "loss" not in self.available_devices[request.id].keys():
             self.available_devices[request.id]['loss'] = 1.0
+        # For OORT
+        # if "util" not in self.available_devices[request.id].keys():
+        #     self.available_devices[request.id]['util'] = 1.0
         self.unlock()
 
         # logging.info(request.id + ': [cpu_usage: ' + str(request.cpu_usage) +
@@ -231,29 +235,6 @@ def evaluate_model_on_worker(model_identifier, worker, dataset_key, model, nr_bi
         print("Target histogram: ", hist_target)
     # print(worker.id, "Average loss: ",test_loss,", Accuracy: ",100.0 * correct / len_dataset, ", total: ", len_dataset, "correct: ", correct)
     return(correct, len_dataset)
-
-# sets up connection only if required. This means for evaluation, only a selected set of devices are used
-# def set_worker_conn(hook, available_devices, previous_worker_instances, verbose):
-#     worker_instances = []
-#     for devid in available_devices:
-#         if previous_worker_instances:
-#             if devid in previous_worker_instances.keys():
-#                 worker_instances.append(previous_worker_instances[devid])
-#             else:    
-#                 kwargs_websocket = {'host' : available_devices[devid]['ip'], 'hook' : hook, 'verbose' : verbose}
-#                 clientWorker = WebsocketClientWorker(id = devid, port = available_devices[devid]['flport'], **kwargs_websocket)
-#                 clientWorker.clear_objects_remote()
-#                 worker_instances.append(clientWorker)
-#                 previous_worker_instances[devid] = clientWorker
-#         else:
-#             kwargs_websocket = {'host' : available_devices[devid]['ip'], 'hook' : hook, 'verbose' : verbose}
-#             clientWorker = WebsocketClientWorker(id = devid, port = available_devices[devid]['flport'], **kwargs_websocket)
-#             clientWorker.clear_objects_remote()
-#             worker_instances.append(clientWorker)
-#             previous_worker_instances[devid] = clientWorker
-        
-    
-#     return worker_instances
 
 # set connection to all available devices. Useful for evaluating model on all devices
 def set_worker_conn(hook, available_devices, available_instances, verbose):
