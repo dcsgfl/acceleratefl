@@ -70,6 +70,7 @@ def generateDelays(n=30):
 usage_array = generateDelays(40)
 usage_iter = 0
 
+id_count = 1
 class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     
     def __init__(self, args):
@@ -91,10 +92,12 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         self.lockObj.release()
 
     def RegisterToCentral(self, request, context):
+        global id_count
         msg = request.ip + ':' + str(request.flport)
-        id = util.get_id(msg)
+        # id = util.get_id(msg)
         
         self.lock()
+        id = id_count + 1
         if id not in self.available_devices:
             self.available_devices[id] = {}
             self.available_devices[id]['id'] = id

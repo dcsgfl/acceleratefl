@@ -1,6 +1,8 @@
 import os
+import sys
 import json
 import torch
+import random
 
 import numpy as np
 import urllib.parse
@@ -13,11 +15,16 @@ from dataset import Dataset
 # Absolute path of "data" directory 
 DATADIR = os.path.join(os.path.abspath(os.path.dirname(__file__)))
 
+# Train and Test flag
+TRAIN = 1
+TEST = 0
+
 class FEMNIST(Dataset):
     def __init__(self) -> None:
         super().__init__()
         self.path = os.path.join(DATADIR, 'femnist')
-        self.url = 'http://www-users.cselabs.umn.edu/~wang8662/'
+        # self.url = 'http://www-users.cselabs.umn.edu/~wang8662/'
+        self.url = 'https://s3.amazonaws.com/nist-srd/SD19/by_class.zip'
         self.zip = 'femnist.zip'
         self.train_dir = os.path.join(self.path, 'train')
         self.test_dir = os.path.join(self.path, 'test')
@@ -75,8 +82,64 @@ class FEMNIST(Dataset):
 
         return True
 
+    # def generate_data(self, id, flag):
+    #     # associate a random constant label with current caller
+    #     # random.seed(1111 + int(id))
+    #     # my_label = random.randint(self.min_label, self.max_label)
+
+    #     # keep only 5 labels for 3 devices to get better clustering
+    #     random.seed(int(id))
+    #     minlabel = self.min_label
+    #     maxlabel = minlabel + 4
+    #     my_label = int(id)
+
+    #     # remove my label from available ones for adding noise
+    #     noise_labels = [*range(minlabel, maxlabel + 1, 1)]
+    #     noise_labels.remove(my_label)
+
+    #     # For maintaining same distribution across train and test, same noise percent should be added
+    #     scenario_data = []
+    #     if flag == TRAIN:
+    #         scenario_data = self.train_data
+    #     elif flag == TEST:
+    #         scenario_data = self.test_data
+    #     else:
+    #         sys.exit("Incorrect flag for get_data")
+
+    #     # get data corresponding to label my_label
+    #     my_data_x = scenario_data[my_label]['x']
+    #     n_data = len(my_data)
+    #     n_prune_75 = int(n_data * 0.75)
+    #     my_data_req = my_data[:n_prune_75]
+
+    #     selected_noise_data = []
+    #     noise_percents = [0.12, 0.07, 0.06]
+    #     for p in noise_percents:
+    #         # select a random noise label and remove it from existing noise list 
+    #         selected_noise_label = random.choice(noise_labels)
+    #         noise_labels.remove(selected_noise_label)
+    #         selected_noise_full_data = scenario_data[selected_noise_label]['x']
+
+    #         # extract only p% of selected noise label indices
+    #         num_idxs = int(len(selected_noise_label_idxs) * p)
+    #         pruned_selected_noise_label_idxs = selected_noise_label_idxs[:num_idxs]
+    #         selected_noise_idxs.extend(pruned_selected_noise_label_idxs)
+
+        
+
+        # # concatenate noise idx and my label index to generate final set of idx
+        # self.generated_data_idxs = np.concatenate([pruned_my_label_idxs , selected_noise_idxs])
+        # np.random.shuffle(self.generated_data_idxs)
+
+        # if flag == TRAIN:
+        #     self.generated_dist_train = True
+        #     self.generated_train_idx = self.generated_data_idxs
+        # else:
+        #     self.generated_dist_test = True
+        #     self.generated_test_idx = self.generated_data_idxs
+
     def get_training_data(self, id):
-        userid=self.users[id]
+        userid=self.users[id%5]
         _tx=self.train_data[userid]['x']
         
         _ty=self.train_data[userid]['y']
