@@ -76,6 +76,9 @@ class Dataset:
         if not self.generated_dist_train:
             self.generate_data(id, TRAIN)
         idx = self.generated_train_idx
+        print(idx)
+        print(type(idx[0]))
+        print(self.train_x[[0, 1]])
 
         # convert train data to tensor
         _tx = self.train_x[idx]

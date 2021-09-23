@@ -1,5 +1,6 @@
 from cifar10 import CIFAR10
 from mnist import MNIST
+from femnist import FEMNIST
 
 class DatasetFactory:
     factories = {}

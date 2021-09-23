@@ -92,3 +92,4 @@ if __name__ == '__main__':
     cls = MNIST()
 
     cls.download_data()
+    cls.get_training_data(9)

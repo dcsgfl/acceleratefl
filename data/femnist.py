@@ -69,7 +69,9 @@ class FEMNIST(Dataset):
     def download_data(self):
 
         # Untar femnist tarfile
-        res=os.popen('tar -xf '+ os.path.join(self.path, self.xz) +' -C '+ self.path).read()
+        if 'train' not in os.listdir(self.path):
+            res=os.popen('tar -xf '+ os.path.join(self.path, self.xz) +' -C '+ self.path).read()
+            print(res)
         
         # get train and test data separately per user
         users, groups, train_data, test_data = self.read_data()
@@ -86,10 +88,8 @@ class FEMNIST(Dataset):
             self.test_x = self.test_x + test_data[user]['x']
             self.test_y = self.test_y + test_data[user]['y']
         
-        lenx = len(self.train_x)
-        self.train_x = np.reshape(self.train_x, (lenx, 28, 28))
-        leny = len(self.train_y)
-        self.train_y = np.reshape(self.train_y, (leny, 28, 28))
+        self.train_x = np.array([np.reshape(x, (28, 28)) for x in self.train_x])
+        self.test_x = np.array([np.reshape(x, (28, 28)) for x in self.test_x])
          
          # get unique label count
         self.unique_labels = list(np.unique(self.train_y))
@@ -114,11 +114,9 @@ class FEMNIST(Dataset):
     
     def get_testing_data(self, id):
         return super().get_testing_data(id)
-        
-        return(tx, ty)
-
 
 if __name__ == '__main__':
     cls = FEMNIST()
 
     cls.download_data()
+    cls.get_training_data(10)
