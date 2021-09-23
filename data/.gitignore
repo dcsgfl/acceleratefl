@@ -1,2 +1,4 @@
 cifar10
 mnist
+femnist/train
+femnist/test

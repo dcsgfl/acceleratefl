@@ -23,9 +23,7 @@ class FEMNIST(Dataset):
     def __init__(self) -> None:
         super().__init__()
         self.path = os.path.join(DATADIR, 'femnist')
-        # self.url = 'http://www-users.cselabs.umn.edu/~wang8662/'
-        self.url = 'https://s3.amazonaws.com/nist-srd/SD19/by_class.zip'
-        self.zip = 'femnist.zip'
+        self.xz = 'femnist.tar.xz'
         self.train_dir = os.path.join(self.path, 'train')
         self.test_dir = os.path.join(self.path, 'test')
                         
@@ -69,94 +67,53 @@ class FEMNIST(Dataset):
         return train_clients, train_groups, train_data, test_data
 
     def download_data(self):
-        # Create cifar10 directory is non-existent
-        os.makedirs(self.path, exist_ok=True)
 
-        # Download femnist tar file is non-existent
-        if self.zip not in os.listdir(self.path):
-            urlretrieve(urllib.parse.urljoin(self.url, self.zip), os.path.join(self.path, self.zip))
-            res=os.popen('unzip '+ os.path.join(self.path, self.zip) +' -d '+ self.path).read()
-            print('Downloaded ', self.zip, ' from ', self.url)
+        # Untar femnist tarfile
+        res=os.popen('tar -xf '+ os.path.join(self.path, self.xz) +' -C '+ self.path).read()
         
-        self.users, self.groups, self.train_data, self.test_data = self.read_data()
+        # get train and test data separately per user
+        users, groups, train_data, test_data = self.read_data()
+
+        #combine train and test data from all users
+        self.train_x = []
+        self.test_x = []
+        self.train_y = []
+        self.test_y = []
+        for user in users:
+            self.train_x = self.train_x + train_data[user]['x']
+            self.train_y = self.train_y + train_data[user]['y']
+            
+            self.test_x = self.test_x + test_data[user]['x']
+            self.test_y = self.test_y + test_data[user]['y']
+        
+        lenx = len(self.train_x)
+        self.train_x = np.reshape(self.train_x, (lenx, 28, 28))
+        leny = len(self.train_y)
+        self.train_y = np.reshape(self.train_y, (leny, 28, 28))
+         
+         # get unique label count
+        self.unique_labels = list(np.unique(self.train_y))
+        self.n_unique_labels = len(self.unique_labels)
+        self.min_label = min(self.unique_labels)
+        self.max_label = max(self.unique_labels)
+
+        # list of list: for both train and test
+        #           inner list: indices corresponding to a specific label
+        #           outer list: unique labels
+        self.indices_train = [[] for x in range(self.n_unique_labels)]
+        self.indices_test = [[] for x in range(self.n_unique_labels)]
+        for i in range(self.n_unique_labels):
+            self.indices_train[i] = np.isin(self.train_y, [i])
+        for i in range(self.n_unique_labels):
+            self.indices_test[i] = np.isin(self.test_y, [i])
 
         return True
 
-    # def generate_data(self, id, flag):
-    #     # associate a random constant label with current caller
-    #     # random.seed(1111 + int(id))
-    #     # my_label = random.randint(self.min_label, self.max_label)
-
-    #     # keep only 5 labels for 3 devices to get better clustering
-    #     random.seed(int(id))
-    #     minlabel = self.min_label
-    #     maxlabel = minlabel + 4
-    #     my_label = int(id)
-
-    #     # remove my label from available ones for adding noise
-    #     noise_labels = [*range(minlabel, maxlabel + 1, 1)]
-    #     noise_labels.remove(my_label)
-
-    #     # For maintaining same distribution across train and test, same noise percent should be added
-    #     scenario_data = []
-    #     if flag == TRAIN:
-    #         scenario_data = self.train_data
-    #     elif flag == TEST:
-    #         scenario_data = self.test_data
-    #     else:
-    #         sys.exit("Incorrect flag for get_data")
-
-    #     # get data corresponding to label my_label
-    #     my_data_x = scenario_data[my_label]['x']
-    #     n_data = len(my_data)
-    #     n_prune_75 = int(n_data * 0.75)
-    #     my_data_req = my_data[:n_prune_75]
-
-    #     selected_noise_data = []
-    #     noise_percents = [0.12, 0.07, 0.06]
-    #     for p in noise_percents:
-    #         # select a random noise label and remove it from existing noise list 
-    #         selected_noise_label = random.choice(noise_labels)
-    #         noise_labels.remove(selected_noise_label)
-    #         selected_noise_full_data = scenario_data[selected_noise_label]['x']
-
-    #         # extract only p% of selected noise label indices
-    #         num_idxs = int(len(selected_noise_label_idxs) * p)
-    #         pruned_selected_noise_label_idxs = selected_noise_label_idxs[:num_idxs]
-    #         selected_noise_idxs.extend(pruned_selected_noise_label_idxs)
-
-        
-
-        # # concatenate noise idx and my label index to generate final set of idx
-        # self.generated_data_idxs = np.concatenate([pruned_my_label_idxs , selected_noise_idxs])
-        # np.random.shuffle(self.generated_data_idxs)
-
-        # if flag == TRAIN:
-        #     self.generated_dist_train = True
-        #     self.generated_train_idx = self.generated_data_idxs
-        # else:
-        #     self.generated_dist_test = True
-        #     self.generated_test_idx = self.generated_data_idxs
-
     def get_training_data(self, id):
-        userid=self.users[id%5]
-        _tx=self.train_data[userid]['x']
-        
-        _ty=self.train_data[userid]['y']
-        num_of_samples = len(_ty)
-        tx = torch.tensor(_tx).reshape(num_of_samples,28,28)
-        ty = torch.tensor(_ty, dtype=torch.int64)
-        
-        return(tx, ty)
+        return super().get_training_data(id)
     
     def get_testing_data(self, id):
-        userid=self.users[id]
-        _tx=self.test_data[userid]['x']
-        
-        _ty=self.test_data[userid]['y']
-        num_of_samples = len(_ty)
-        tx = torch.tensor(_tx).reshape(num_of_samples,28,28)
-        ty = torch.tensor(_ty, dtype=torch.int64)
+        return super().get_testing_data(id)
         
         return(tx, ty)
 
