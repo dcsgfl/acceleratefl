@@ -79,6 +79,7 @@ class Dataset:
         print(idx)
         print(type(idx[0]))
         print(self.train_x[[0, 1]])
+        print(self.train_y[[0, 1]])
 
         # convert train data to tensor
         _tx = self.train_x[idx]
