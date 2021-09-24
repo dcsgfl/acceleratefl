@@ -10,6 +10,7 @@ from numpy import unique
 from numpy.linalg import norm
 
 from sklearn.cluster import DBSCAN
+from sklearn.cluster import OPTICS
 
 """
 Basic clustering routine for clustering histograms.
@@ -49,9 +50,11 @@ def cluster_mat(matList, xKeySpace, yKeySpace):
             distMat[i,j] = dist
             distMat[j,i] = dist
 
-    model = DBSCAN(eps=1.13, min_samples=2,
-                   metric='precomputed')
-    yhat = model.fit_predict(distMat)
-
-    return yhat
+    return OPTICS(min_samples=2,
+                  metric="precomputed").fit_predict(distMat)
+    #model = DBSCAN(eps=1.13, min_samples=2,
+    #               metric='precomputed')
+    #yhat = model.fit_predict(distMat)
+    #
+    #return yhat
 
