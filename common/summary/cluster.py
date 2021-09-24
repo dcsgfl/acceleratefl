@@ -23,10 +23,11 @@ def cluster_hist(histogramList, keySpace):
     for idx, hist in enumerate(histogramList):
         X[idx,:] = hist.toFrequencyArray(keySpace)
 
-    model = DBSCAN(eps=0.30, min_samples=2)
-    yhat = model.fit_predict(X)
+    return OPTICS(min_samples=2).fit_predict(X)
+#    model = DBSCAN(eps=0.30, min_samples=2)
+#    yhat = model.fit_predict(X)
 
-    return yhat
+#    return yhat
 
 
 """
