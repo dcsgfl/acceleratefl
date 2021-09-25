@@ -45,24 +45,12 @@ def cluster_hist(histogramList, keySpace):
 
     for i in range(dim):
         for j in range(i, dim):
-            #h1 = histogramList[i]
-            #h2 = histogramList[j]
-            #dist = h1.computeHellingerDist(h2, keySpace)
             dist = hdist(X[i,:], X[j,:])
             distMat[i,j] = dist
             distMat[j,i] = dist
 
-    #return DBSCAN(min_samples=2,eps=0.33,
-    #              metric="precomputed").fit_predict(distMat)
-    return OPTICS(min_samples=2,
+    return DBSCAN(min_samples=2,eps=0.33,
                   metric="precomputed").fit_predict(distMat)
-
-    #return OPTICS(min_samples=2).fit_predict(X)
-    #return OPTICS(min_samples=2).fit_predict(X)
-    #model = DBSCAN(eps=0.30, min_samples=2)
-    #yhat = model.fit_predict(X)
-
-    #return yhat
 
 """
 Basic clustering routine for clustering a list of histograms.
@@ -88,11 +76,3 @@ def cluster_mat(matList, xKeySpace, yKeySpace):
 
     return OPTICS(min_samples=2,
                   metric="precomputed").fit_predict(distMat)
-    #return DBSCAN(min_samples=2,eps=0.33,
-    #              metric="precomputed").fit_predict(distMat)
-    #model = DBSCAN(eps=1.13, min_samples=2,
-    #               metric='precomputed')
-    #yhat = model.fit_predict(distMat)
-    #
-    #return yhat
-
