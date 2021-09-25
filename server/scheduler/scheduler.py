@@ -44,40 +44,55 @@ class Scheduler:
     def _schedule_clusters(self, clustInfo, available_devices, client_threshold):
 
         closs = {}
+        clat  = {}
         cdevs = {}
+
+        RHO = 0.5   # Weight loss and latency reduction equally
 
         #
         # Compute the total loss in each cluster
+        # and max latency
         #
         for devId in available_devices:
 
             dev = available_devices[devId]
             clustId = dev["cluster"]
             sqloss = math.pow(dev['loss'], 2.0)
+            latency = dev['cpu_usage']
 
             if clustId not in closs.keys():
                 closs[clustId] = sqloss
+                clat[clustId]  = latency
                 cdevs[clustId] = []
             else:
                 closs[clustId] += sqloss
+                clat[clustId]  += float(latency)
 
             cdevs[clustId].append(dev.copy())
 
         #
-        # Compute the average loss in each cluster and assign a
-        # sampling probability based on the average loss.
+        # Compute the averages and max latency
+        #
+        maxLatency = 0.0
+        totalLoss = 0.0
+        for cid in closs.keys():
+            closs[cid] /= float(clustInfo[cid]['count'])
+            clat[cid]  /= float(clustInfo[cid]['count'])
+            maxLatency = max(clat[cid], maxLatency)
+            totalLoss += closs[cid]
+
+        #
+        # Compute sampling weights
         #
         clusters = []
         probs = []
-        denom = 0.0
         for cid in closs.keys():
-            closs[cid] /= clustInfo[cid]['count']
-            denom += closs[cid]
-            clusters.append(cid)
-            probs.append(closs[cid])
+            latRed = 1.0 - (clat[cid] / maxLatency)
+            normLoss = closs[cid] / totalLoss
+            p = RHO*latRed + (1.0 - RHO)*normLoss
 
-        for idx in range(len(probs)):
-            probs[idx] /= denom
+            clusters.append(cid)
+            probs.append(p)
 
         #
         # Sort the devices in each cluster by their utility
@@ -100,10 +115,6 @@ class Scheduler:
         #
         selected = {}
 
-        #print(clusters)
-        #print(probs)
-
-        #count = len(clusters)
         count = client_threshold
         for i in range(count):
 
@@ -111,7 +122,9 @@ class Scheduler:
             clust = clusters[idx]
             devs = cdevs[clust]
             dev = devs[0]    # this will just work if sorted jsw
-            selected[dev['id']] = dev
+
+            if dev['loss'] > 0.0:
+                selected[dev['id']] = dev
 
             del devs[0]
             if len(devs) == 0:
@@ -123,8 +136,6 @@ class Scheduler:
 
                 for i2 in range(len(probs)):
                     probs[i2] += (p / float(len(probs)))
-
-        #print(selected.keys())
 
         return selected
 

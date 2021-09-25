@@ -22,7 +22,10 @@ from pyScheduler import PYSched
 from tiflScheduler import TIFLSched
 
 def getRandomConvexCombination(dim):
-    return [0.25, 0.25, 0.25, 0.25] # todo
+    probs = [0.1, 0.1, 0.1, 0.1]
+    ridx = randrange(4)
+    probs[ridx] = 0.7
+    return probs
 
 def getDevice(dev_id, numDataPoints, keySpaceList):
 
@@ -39,7 +42,8 @@ def getDevice(dev_id, numDataPoints, keySpaceList):
     dev["id"] = dev_id
     dev["summary"] = histSummary.toJson()
     dev["cpu_usage"] = float(randrange(100)) / 100.0
-    dev["loss"] = 1.0
+    dev["loss"] = float(randrange(100)) / 100.0
+    #dev["loss"] = 1.0
 
     return dev
 
@@ -50,31 +54,35 @@ devs["dev_0"]  = getDevice("dev_0", 1000, keySpace)
 devs["dev_1"]  = getDevice("dev_1", 1000, keySpace)
 devs["dev_2"]  = getDevice("dev_2", 1000, keySpace)
 devs["dev_3"]  = getDevice("dev_3", 1000, keySpace)
-devs["dev_4"]  = getDevice("dev_3", 1000, keySpace)
-devs["dev_5"]  = getDevice("dev_3", 1000, keySpace)
-devs["dev_6"]  = getDevice("dev_3", 1000, keySpace)
-devs["dev_7"]  = getDevice("dev_3", 1000, keySpace)
-devs["dev_8"]  = getDevice("dev_3", 1000, keySpace)
-devs["dev_9"]  = getDevice("dev_3", 1000, keySpace)
-devs["dev_10"] = getDevice("dev_3", 1000, keySpace)
-devs["dev_11"] = getDevice("dev_3", 1000, keySpace)
+devs["dev_4"]  = getDevice("dev_4", 1000, keySpace)
+devs["dev_5"]  = getDevice("dev_5", 1000, keySpace)
+devs["dev_6"]  = getDevice("dev_6", 1000, keySpace)
+devs["dev_7"]  = getDevice("dev_7", 1000, keySpace)
+devs["dev_8"]  = getDevice("dev_8", 1000, keySpace)
+devs["dev_9"]  = getDevice("dev_9", 1000, keySpace)
+devs["dev_10"] = getDevice("dev_10", 1000, keySpace)
+devs["dev_11"] = getDevice("dev_11", 1000, keySpace)
 
-print("PY TEST")
-#print(devs)
 py = PYSched()
 py.notify_worker_update(devs)
 
-ignored_thresh = 2
-selected_devs = py.select_worker_instances(devs, ignored_thresh)
-print(selected_devs)
+print("PY TEST")
+for k in devs.keys():
+    print(k,":",devs[k])
 
-print("TIFL TEST")
-tifl = TIFLSched()
-tifl.notify_worker_update(devs)
-for key in devs.keys():
-    print(devs[key])
+thresh = 4
+selected_devs = py.select_worker_instances(devs, thresh)
+print("SELECTED")
+for k in selected_devs.keys():
+    print(k,":",selected_devs[k])
 
-print()
-ignored_thresh = 2
-selected_devs = tifl.select_worker_instances(devs, ignored_thresh)
-print(selected_devs)
+#print("TIFL TEST")
+#tifl = TIFLSched()
+#tifl.notify_worker_update(devs)
+#for key in devs.keys():
+#    print(devs[key])
+
+#print()
+#ignored_thresh = 2
+#selected_devs = tifl.select_worker_instances(devs, ignored_thresh)
+#print(selected_devs)
