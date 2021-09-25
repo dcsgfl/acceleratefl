@@ -56,27 +56,30 @@ class HistSummary(object):
 
         return float(len(keys1.intersection(keys2))) / float(len(keys1.union(keys2)))
 
-    def computeHellingerDist(self, hist2):
+    def computeHellingerDist(self, hist2, allKeys=[]):
 
         if not isinstance(hist2, HistSummary):
             raise ValueError("Input must be a HistSummary")
 
         sqrt2 = np.sqrt(2)
-        allKeys = (Counter(self.values) + Counter(hist2.values)).keys()
+        if len(allKeys) < 1:
+            allKeys = (Counter(self.values) + Counter(hist2.values)).keys()
 
-        devP = np.zeros(len(allKeys))
-        devQ = np.zeros(len(allKeys))
+        devP = self.toFrequencyArray(allKeys)
+        devQ = hist2.toFrequencyArray(allKeys)
+        #devP = np.zeros(len(allKeys))
+        #devQ = np.zeros(len(allKeys))
 
-        idx = 0
-        for k in allKeys:
+        #idx = 0
+        #for k in allKeys:
             
-            if k in self.values:
-                devP[idx] = float(self.values[k])
+        #    if k in self.values:
+        #        devP[idx] = float(self.values[k])
 
-            if k in hist2.values:
-                devQ[idx] = float(hist2.values[k])
+        #    if k in hist2.values:
+        #        devQ[idx] = float(hist2.values[k])
 
-            idx = idx + 1
+        #    idx = idx + 1
 
         sqrtdevP = np.sqrt(devP)
         sqrtdevQ = np.sqrt(devQ)
@@ -111,7 +114,6 @@ class HistSummary(object):
 
     def toFrequencyArray(self, keySpace):
 
-        
         arr = self.toArray(keySpace)
         denom = 0.0
         for key in self.values.keys():
@@ -151,6 +153,15 @@ class HistMatSummary(object):
     def getKeys(self):
         return set(self.values.keys())
 
+    def getYKeys(self):
+        return self.getKeys()
+
+    def getXKeys(self):
+        xkeys = set()
+        for k in self.values.keys():
+            hk = self.values[k]
+            xkeys = xkeys.union(hk.getKeys())
+        return xkeys
     """
     Serialization functions
     """
