@@ -41,6 +41,14 @@ class Dataset:
         else:
             sys.exit("Incorrect flag for get_data")
 
+        # get index corresponding to my data label and take 90%
+        all_my_label_idxs = tuple(np.where(scenario_index[my_label])[0])
+
+        # take 90% data of my label and then add 12/7/6 % noise of the 90% data
+        # 90% == 100 % train data
+        num_90_idxs = int(len(all_my_label_idxs) * 0.90)
+        pruned_my_label_idxs = all_my_label_idxs[:num_90_idxs]
+
         selected_noise_idxs = []
         noise_percents = [0.12, 0.07, 0.06]
         for p in noise_percents:
@@ -50,14 +58,9 @@ class Dataset:
             selected_noise_label_idxs = tuple(np.where(scenario_index[selected_noise_label])[0])
 
             # extract only p% of selected noise label indices
-            num_idxs = int(len(selected_noise_label_idxs) * p)
+            num_idxs = int(num_90_idxs * p)
             pruned_selected_noise_label_idxs = selected_noise_label_idxs[:num_idxs]
             selected_noise_idxs.extend(pruned_selected_noise_label_idxs)
-
-        # get index corresponding to my data label and take 90%
-        all_my_label_idxs = tuple(np.where(scenario_index[my_label])[0])
-        num_idxs = int(len(all_my_label_idxs) * 0.75)
-        pruned_my_label_idxs = all_my_label_idxs[:num_idxs]
 
         # concatenate noise idx and my label index to generate final set of idx
         self.generated_data_idxs = np.concatenate([pruned_my_label_idxs , selected_noise_idxs])
