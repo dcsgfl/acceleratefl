@@ -93,7 +93,7 @@ class TestDataset(unittest.TestCase):
             self.assertTrue(False)
         else:
             self.assertTrue(True)
-        print("cifar10 train complete")
+        print("femnist train complete")
 
     def test_femnist_test(self):
         # self.skipTest("another method for skipping")

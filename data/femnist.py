@@ -91,8 +91,8 @@ class FEMNIST(Dataset):
         self.train_x = np.array([np.reshape(x, (28, 28)) for x in self.train_x])
         self.test_x = np.array([np.reshape(x, (28, 28)) for x in self.test_x])
 
-        self.train_x = np.array(self.train_x)
         self.train_y = np.array(self.train_y)
+        self.test_y = np.array(self.test_y)
          
          # get unique label count
         self.unique_labels = list(np.unique(self.train_y))
