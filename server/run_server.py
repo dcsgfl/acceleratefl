@@ -110,7 +110,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         
         return devicetocentral_pb2.RegStatus(
             success = True,
-            id = id
+            id = str(id)
         )
     
     def HeartBeat(self, request, context):
