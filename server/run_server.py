@@ -97,7 +97,8 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         # id = util.get_id(msg)
         
         self.lock()
-        id = id_count + 1
+        id_count += 1
+        id = str(id_count)
         if id not in self.available_devices:
             self.available_devices[id] = {}
             self.available_devices[id]['id'] = id
@@ -110,7 +111,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         
         return devicetocentral_pb2.RegStatus(
             success = True,
-            id = str(id)
+            id = id
         )
     
     def HeartBeat(self, request, context):
