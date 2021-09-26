@@ -227,7 +227,7 @@ def parse_arguments(args = sys.argv[1:]):
         '--dataset',
         '-ds',
         type=str,
-        default='MNIST',
+        default='FEMNIST',
         help='dataset used for the model: --dataset CIFAR10'
     )
 

@@ -381,7 +381,7 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--dataset',
         type = str,
-        default='MNIST',
+        default='FEMNIST',
         help = 'Dataset used',
     )
 
@@ -402,7 +402,7 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--scheduler',
         type = str,
-        default = 'TIFLSched',
+        default = 'RNDSched',
         help = 'Scheduler type',
     )
 
