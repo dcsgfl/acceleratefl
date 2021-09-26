@@ -88,8 +88,8 @@ class FEMNIST(Dataset):
             self.test_x = self.test_x + test_data[user]['x']
             self.test_y = self.test_y + test_data[user]['y']
         
-        self.train_x = np.array([np.reshape(x, (28, 28)) for x in self.train_x])
-        self.test_x = np.array([np.reshape(x, (28, 28)) for x in self.test_x])
+        self.train_x = np.array([np.reshape(x, (28, 28).astype('float32')) for x in self.train_x])
+        self.test_x = np.array([np.reshape(x, (28, 28).astype('float32')) for x in self.test_x])
 
         self.train_y = np.array(self.train_y)
         self.test_y = np.array(self.test_y)
