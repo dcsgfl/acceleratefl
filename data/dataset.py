@@ -44,10 +44,14 @@ class Dataset:
         # get index corresponding to my data label and take 90%
         all_my_label_idxs = tuple(np.where(scenario_index[my_label])[0])
 
-        # take 90% data of my label and then add 12/7/6 % noise of the 90% data
-        # 90% == 100 % train data
-        num_90_idxs = int(len(all_my_label_idxs) * 0.90)
-        pruned_my_label_idxs = all_my_label_idxs[:num_90_idxs]
+        # take 80-90% data of my label and then add 12/7/6 % noise of the 80-90% data
+        # 80-90% == 100 % train data
+        percent = random.uniform(80.0, 90.0)
+        num_80_90_idxs = int(len(all_my_label_idxs) * percent)
+
+        #take 75% of 80-90% as majority
+        num_75_idxs = int(num_80_90_idxs * 0.75)
+        pruned_my_label_idxs = all_my_label_idxs[:num_75_idxs]
 
         selected_noise_idxs = []
         noise_percents = [0.12, 0.07, 0.06]
@@ -58,7 +62,7 @@ class Dataset:
             selected_noise_label_idxs = tuple(np.where(scenario_index[selected_noise_label])[0])
 
             # extract only p% of selected noise label indices
-            num_idxs = int(num_90_idxs * p)
+            num_idxs = int(num_80_90_idxs * p)
             pruned_selected_noise_label_idxs = selected_noise_label_idxs[:num_idxs]
             selected_noise_idxs.extend(pruned_selected_noise_label_idxs)
 
