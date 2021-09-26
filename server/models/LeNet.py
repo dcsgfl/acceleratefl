@@ -68,4 +68,7 @@ class LeNet(nn.Module):
         x = func.relu(x)
         x = self.fc2(x)
         return func.log_softmax(x,dim=1)
-        
+
+    class Factory:
+         def get(self):
+             return LeNet()
