@@ -49,7 +49,7 @@ def cluster_hist(histogramList, keySpace):
             distMat[i,j] = dist
             distMat[j,i] = dist
 
-    return DBSCAN(min_samples=2,eps=0.33,
+    return OPTICS(min_samples=2,eps=0.33,cluster_method="dbscan",
                   metric="precomputed").fit_predict(distMat)
 
 """
