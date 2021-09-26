@@ -83,7 +83,7 @@ class Dataset:
         # convert train data to tensor
         _tx = self.train_x[idx]
         _ty = self.train_y[idx]
-        tx = torch.tensor(_tx)
+        tx = torch.tensor(_tx).type('torch.FloatTensor')
         ty = torch.tensor(_ty, dtype=torch.int64)
 
         return(tx, ty)
@@ -97,7 +97,7 @@ class Dataset:
         # convert test data to tensor
         _tx = self.test_x[idx]
         _ty = self.test_y[idx]
-        tx = torch.tensor(_tx)
+        tx = torch.tensor(_tx).type('torch.FloatTensor')
         ty = torch.tensor(_ty, dtype=torch.int64)
         
         return(tx, ty)
