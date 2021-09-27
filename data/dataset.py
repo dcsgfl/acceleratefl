@@ -19,6 +19,10 @@ class Dataset:
     
     def generate_data(self, id, flag):
         # associate a random constant label with current caller
+        # random.seed(1111 + int(id))
+        # my_label = random.randint(self.min_label, self.max_label)
+
+        # keep only 5 labels for 3 devices to get better clustering
         random.seed(int(id))
         minlabel = self.min_label
         maxlabel = minlabel + 4
@@ -37,8 +41,20 @@ class Dataset:
         else:
             sys.exit("Incorrect flag for get_data")
 
+        # get index corresponding to my data label and take 90%
+        all_my_label_idxs = tuple(np.where(scenario_index[my_label])[0])
+
+        # take 80-90% data of my label and then add 12/7/6 % noise of the 80-90% data
+        # 80-90% == 100 % train data
+        percent = random.uniform(80.0, 90.0)
+        num_80_90_idxs = int(len(all_my_label_idxs) * percent)
+
+        #take 75% of 80-90% as majority
+        num_75_idxs = int(num_80_90_idxs * 0.75)
+        pruned_my_label_idxs = all_my_label_idxs[:num_75_idxs]
+
         selected_noise_idxs = []
-        noise_percents = [0.12, 0.6, 0.07]
+        noise_percents = [0.12, 0.07, 0.06]
         for p in noise_percents:
             # select a random noise label and remove it from existing noise list 
             selected_noise_label = random.choice(noise_labels)
@@ -46,14 +62,9 @@ class Dataset:
             selected_noise_label_idxs = tuple(np.where(scenario_index[selected_noise_label])[0])
 
             # extract only p% of selected noise label indices
-            num_idxs = int(len(selected_noise_label_idxs) * p)
+            num_idxs = int(num_80_90_idxs * p)
             pruned_selected_noise_label_idxs = selected_noise_label_idxs[:num_idxs]
             selected_noise_idxs.extend(pruned_selected_noise_label_idxs)
-
-        # get index corresponding to my data label and take 90%
-        all_my_label_idxs = tuple(np.where(scenario_index[my_label])[0])
-        num_idxs = int(len(all_my_label_idxs) * 0.6)
-        pruned_my_label_idxs = all_my_label_idxs[:num_idxs]
 
         # concatenate noise idx and my label index to generate final set of idx
         self.generated_data_idxs = np.concatenate([pruned_my_label_idxs , selected_noise_idxs])
@@ -76,7 +87,7 @@ class Dataset:
         # convert train data to tensor
         _tx = self.train_x[idx]
         _ty = self.train_y[idx]
-        tx = torch.tensor(_tx)
+        tx = torch.tensor(_tx).type('torch.FloatTensor')
         ty = torch.tensor(_ty, dtype=torch.int64)
 
         return(tx, ty)
@@ -90,7 +101,7 @@ class Dataset:
         # convert test data to tensor
         _tx = self.test_x[idx]
         _ty = self.test_y[idx]
-        tx = torch.tensor(_tx)
+        tx = torch.tensor(_tx).type('torch.FloatTensor')
         ty = torch.tensor(_ty, dtype=torch.int64)
         
         return(tx, ty)
