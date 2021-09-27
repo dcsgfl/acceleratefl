@@ -22,10 +22,10 @@ class Dataset:
         # random.seed(1111 + int(id))
         # my_label = random.randint(self.min_label, self.max_label)
 
-        # keep only 5 labels for 3 devices to get better clustering
+        # maximum 20 labels for 100 devices to get better clustering
         random.seed(int(id))
         minlabel = self.min_label
-        maxlabel = minlabel + 4
+        maxlabel = minlabel + 20
         my_label = random.randint(minlabel, maxlabel)
 
         # remove my lable from available ones for adding noise
