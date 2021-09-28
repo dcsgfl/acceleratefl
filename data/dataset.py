@@ -25,7 +25,7 @@ class Dataset:
         # maximum 20 labels for 100 devices to get better clustering
         random.seed(int(id))
         minlabel = self.min_label
-        maxlabel = minlabel + 20
+        maxlabel = minlabel + 10
         my_label = random.randint(minlabel, maxlabel)
 
         # remove my lable from available ones for adding noise
@@ -59,6 +59,8 @@ class Dataset:
             # select a random noise label and remove it from existing noise list 
             selected_noise_label = random.choice(noise_labels)
             noise_labels.remove(selected_noise_label)
+            print("NOISE 2: ",selected_noise_label)
+            print("NOISE 1: ",p," ",len(np.where(scenario_index[selected_noise_label])))
             selected_noise_label_idxs = tuple(np.where(scenario_index[selected_noise_label])[0])
 
             # extract only p% of selected noise label indices
