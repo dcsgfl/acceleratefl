@@ -80,6 +80,9 @@ class Dataset:
 
     def get_training_data(self, id):
         # check if data already generated
+        minlabel = self.min_label
+        maxlabel = minlabel + 20
+        id = id % maxlabel
         if not self.generated_dist_train:
             self.generate_data(id, TRAIN)
         idx = self.generated_train_idx
@@ -94,6 +97,9 @@ class Dataset:
 
     def get_testing_data(self, id):
         # check if data already generated
+        minlabel = self.min_label
+        maxlabel = minlabel + 20
+        id = id % maxlabel
         if not self.generated_dist_test:
             self.generate_data(id, TEST)
         idx = self.generated_test_idx
