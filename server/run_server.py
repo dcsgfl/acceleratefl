@@ -345,6 +345,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                 )
                 _correct+=correct
                 _total+=total
+                # For TiFL
                 devcentral.available_devices[devid]["loss"] = 1.0 - (float(correct) / float(total))
 
             eval_end_time = time.time()
