@@ -46,7 +46,7 @@ class Dataset:
 
         # take 80-90% data of my label and then add 12/7/6 % noise of the 80-90% data
         # 80-90% == 100 % train data
-        percent = random.uniform(80.0, 90.0)
+        percent = random.uniform(80.0, 90.0) / 100.0
         num_80_90_idxs = int(len(all_my_label_idxs) * percent)
 
         #take 75% of 80-90% as majority
