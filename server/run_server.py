@@ -116,8 +116,12 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         self.available_devices[request.id]['load'] = request.load15
         self.available_devices[request.id]['virtual_mem'] = request.virtual_mem
         self.available_devices[request.id]['battery'] = request.battery
+        # for TiFL
         if "loss" not in self.available_devices[request.id].keys():
             self.available_devices[request.id]['loss'] = 1.0
+        # For OORT
+        if "util" not in self.available_devices[request.id].keys():
+            self.available_devices[request.id]['util'] = 1.0
         self.unlock()
 
         # logging.info(request.id + ': [cpu_usage: ' + str(request.cpu_usage) +
