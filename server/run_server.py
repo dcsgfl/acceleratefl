@@ -483,7 +483,7 @@ if __name__ == '__main__':
     grpcservice.start()
 
     # train and eval models 
-    client_threshold = 5
+    client_threshold = 20
     asyncio.get_event_loop().run_until_complete(
         train_and_eval(args, devcentral, client_threshold, args.verbose)
     )

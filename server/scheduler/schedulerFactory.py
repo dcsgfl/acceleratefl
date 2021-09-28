@@ -1,6 +1,7 @@
 from rndScheduler import RNDSched
 from pyScheduler import PYSched
 from pxyScheduler import PXYSched
+from oortScheduler import OORTSched
 from tiflScheduler import TIFLSched
 
 class SchedulerFactory:
