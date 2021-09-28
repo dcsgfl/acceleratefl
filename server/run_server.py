@@ -67,7 +67,7 @@ def generateDelays(n=30):
 
     return delays
 
-usage_array = generateDelays(40)
+usage_array = generateDelays(110)
 usage_iter = 0
 
 id_count = 1
@@ -124,8 +124,8 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         if "loss" not in self.available_devices[request.id].keys():
             self.available_devices[request.id]['loss'] = 1.0
         # For OORT
-        # if "util" not in self.available_devices[request.id].keys():
-        #     self.available_devices[request.id]['util'] = 1.0
+        if "util" not in self.available_devices[request.id].keys():
+            self.available_devices[request.id]['util'] = 1.0
         self.unlock()
 
         # logging.info(request.id + ': [cpu_usage: ' + str(request.cpu_usage) +
