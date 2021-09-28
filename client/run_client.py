@@ -35,6 +35,8 @@ from hist import HistSummary, HistMatSummary
 
 devid = ""
 
+DP_EPSILON = 0.1
+
 # register device with central server and get device id
 def register_to_central(args):
     with grpc.insecure_channel(args.centralip + ':50051') as channel:
@@ -94,6 +96,8 @@ def heartbeat(args, once):
 
 def send_summary(args, datacls):
 
+    global DP_EPSILON
+
     tensor_train_x, tensor_train_y = datacls.get_training_data(devid)
     train_y = tensor_train_y.numpy()
     summaryType = args.summary.lower()
@@ -103,6 +107,7 @@ def send_summary(args, datacls):
 
         histInput = list(map(str, train_y.tolist()))
         histSummary = HistSummary(histInput)
+        histSummary.addNoise(DP_EPSILON)
         summaryPayload = histSummary.toJson()
 
     elif summaryType == "pxy":
@@ -143,6 +148,7 @@ def send_summary(args, datacls):
             histMatInput[label] = HistSummary(hip)
 
         histSummary = HistMatSummary(histMatInput)
+        histSummary.addNoise(DP_EPSILON)
         summaryPayload = histSummary.toJson()
 
     else:
