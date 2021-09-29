@@ -27,7 +27,8 @@ def mnorm(m1, m2):
     for x in range(m1.shape[0]):
         d = hdist(m1[x,:], m2[x,:])
         avgDist += d
-    return avgDist / float(m1.shape[0])
+    return avgDist
+    #return avgDist / float(m1.shape[0])
 
 """
 Basic clustering routine for clustering histograms.
