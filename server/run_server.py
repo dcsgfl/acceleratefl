@@ -45,25 +45,62 @@ from modelFactory import ModelFactory as mdlftry
 from schedulerFactory import SchedulerFactory as schedftry
 
 LOCK_TRACE = False
+EXPECTED_EPOCH_DURATION = 10.0
 
-def generateDelays(n=30):
-    np.random.seed(1111)
+def generateNetworkDelays(n=30):
+
+    MODEL_SIZE_IN_BITS = float(8 * 10 * 1024 * 1024)   # 10 MB
+
+    np.random.seed(0x12345678)
     delays = []
 
     # fast, medium, slow, very slow probabilities
-    probs = np.array([0.6, 0.2, 0.15, 0.5])
+    probs = np.array([0.6, 0.2, 0.14, 0.06])
     samples = np.random.multinomial(1, probs, n)
 
     for sample in samples:
-        draw = np.array([np.random.uniform( 0.01,  5.0),
-                         np.random.uniform( 5.00, 15.0),
-                         np.random.uniform(15.00, 30.0),
-                         np.random.uniform(30.00, 60.0)])
+
+        # Just generate a random latency in seconds (20-200ms)
+        latency = np.random.uniform(0.02, 0.2)
+
+        # BW values in megabits per sec
+        draw = np.array([np.random.uniform(75.0, 100.0),
+                         np.random.uniform(50.0,  75.0),
+                         np.random.uniform(25.0,  50.0),
+                         np.random.uniform( 1.0,  25.0)])
+
+        bw_arr = np.multiply(sample, draw)
+        bw_idx = np.nonzero(bw_arr)
+        bw = float(bw_arr[bw_idx]) * 1024.0 * 1024.0
+
+        nw_delay = latency + (MODEL_SIZE_IN_BITS / bw)
+        delays.append(nw_delay)
+
+    return delays
+
+def generateDelays(n=30):
+
+    global EXPECTED_EPOCH_DURATION
+
+    np.random.seed(1111)
+    delays = []
+
+    nw_delays = generateNetworkDelays(n)
+
+    # fast, medium, slow, very slow probabilities
+    probs = np.array([0.6, 0.2, 0.14, 0.06])
+    samples = np.random.multinomial(1, probs, n)
+
+    for idx, sample in enumerate(samples):
+        draw = np.array([np.random.uniform(0.0, 0.5),
+                         np.random.uniform(0.5, 1.0),
+                         np.random.uniform(1.0, 1.5),
+                         np.random.uniform(1.5, 2.0)])
 
         delay_arr = np.multiply(sample, draw)
         delay_idx = np.nonzero(delay_arr)
-        delay = float(delay_arr[delay_idx])
-        delays.append(delay)
+        cpu_delay = float(delay_arr[delay_idx]) * float(EXPECTED_EPOCH_DURATION)
+        delays.append(cpu_delay + nw_delays[idx])
 
     return delays
 
@@ -177,7 +214,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
 def loss_fn(pred, target):
     return F.nll_loss(input=pred, target=target)
 
-async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, lr, dataset, usage):
+async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, lr, dataset, delay):
     """
     Send the model to the worker and fit the model on the worker's training data.
 
@@ -205,8 +242,9 @@ async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, 
         optimizer="SGD",
         optimizer_args={"lr": lr},
     )
-    base_latency = 45.0
-    latency =  base_latency + usage
+    #base_latency = 45.0
+    #latency =  base_latency + usage
+    latency = delay
 
     train_config.send(worker)
     loss = await worker.async_fit(dataset_key=dataset + '_TRAIN', return_ids=[0])      # TODO: add deadline here
@@ -298,13 +336,14 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                     max_nr_batches=max_fed_epoch,
                     lr=learning_rate,
                     dataset= dataset,
-                    usage= available_devices[devid]['cpu_usage']
+                    delay= available_devices[devid]['cpu_usage']
                 )
                 for devid in selected_worker_instances #if batch_size_list[worker.id]>0
             ]
         )
 
         train_end_time = time.time()
+        actual_train_time = train_end_time - train_start_time
 
         models = {}
         loss_values = {}
@@ -312,13 +351,14 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
         # test_models = curr_round % 10 == 1 or curr_round == args.training_rounds
 
         # Federate models (note that this will also change the model in models[0]
-        avg_fit_time = 0.0
-        for worker_id, worker_model, worker_loss, fit_time in results:    # training loss
-            avg_fit_time += fit_time
+        max_latency = 0.0
+        for worker_id, worker_model, worker_loss, latency in results:
+            max_latency = max(max_latency, latency)
             if worker_model is not None:
                 models[worker_id] = worker_model
                 loss_values[worker_id] = worker_loss
-        avg_fit_time = avg_fit_time / float(len(results))
+
+        fit_time = actual_train_time + max_latency
 
         traced_model = utils.federated_avg(models)
 
@@ -346,7 +386,8 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                 devcentral.available_devices[devid]["loss"] = 1.0 - (float(correct) / float(total))
 
                 # For Oort
-                expected_fit_time = 65.0
+                global EXPECTED_EPOCH_DURATION
+                expected_fit_time = 1.5 * EXPECTED_EPOCH_DURATION
                 alpha = 15
                 loss = 1.0 - (float(correct) / float(total))
                 global_util = 1.0
@@ -355,7 +396,15 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                 devcentral.available_devices[devid]["util"] = loss * global_util
 
             eval_end_time = time.time()
-            print("EPOCH:", curr_round, " AVG_ACCURACY: ",_correct/_total,"#WORKERS: ", len(selected_worker_instances),  " SCHED TIME: ", schedule_end_time - schedule_start_time, " TRAIN TIME: ", train_end_time - train_start_time, " TOTAL TRAIN: ", schedule_end_time - schedule_start_time + train_end_time - train_start_time, " FIT TIME: ", avg_fit_time,  " EVAL TIME: ", eval_end_time - eval_start_time)
+
+            print("EPOCH:", curr_round, \
+                  "AVG_ACCURACY:", _correct/_total, \
+                  "#WORKERS:",     len(selected_worker_instances), \
+                  "SCHED TIME:",   schedule_end_time - schedule_start_time, \
+                  "TRAIN TIME:",   actual_train_time, \
+                  "TOTAL TRAIN:",  schedule_end_time - schedule_start_time + actual_train_time, \
+                  "FIT TIME:",     fit_time, \
+                  "EVAL TIME:",    eval_end_time - eval_start_time)
 
         # decay learning rate
         learning_rate = max(0.98 * learning_rate, args.lr * 0.01)

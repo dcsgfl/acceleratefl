@@ -74,7 +74,7 @@ def heartbeat(args, once):
 
         with grpc.insecure_channel(args.centralip + ':50051') as channel:
             stub = devicetocentral_pb2_grpc.DeviceToCentralStub(channel)
-            logging.info('Heat beat to server...')
+            #logging.info('Heat beat to server...')
             resp = stub.HeartBeat(
                 devicetocentral_pb2.Ping (
                     cpu_usage = psutil.cpu_percent(),
@@ -87,7 +87,7 @@ def heartbeat(args, once):
             )
 
             if resp.ack :
-                logging.info('Heart beat success...')
+                pass
             else:
                 logging.info('Connection to server failed...')
                 return
