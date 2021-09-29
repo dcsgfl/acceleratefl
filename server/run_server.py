@@ -363,7 +363,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
 def grpcServe(devcentral):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     devicetocentral_pb2_grpc.add_DeviceToCentralServicer_to_server(devcentral, server)
-    server.add_insecure_port('localhost:50051')
+    server.add_insecure_port('0.0.0.0:50051')
     server.start()
     server.wait_for_termination()
 
