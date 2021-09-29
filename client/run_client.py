@@ -182,8 +182,6 @@ def start_websocker_server_worker(id, host, port, dataset, datacls, hook, verbos
         port = port,
         hook = hook,
         verbose = verbose)
-    
-    print("Client:")
 
     # Training data
     train_data, train_targets = datacls.get_training_data(id)
