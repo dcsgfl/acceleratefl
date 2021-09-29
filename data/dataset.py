@@ -25,7 +25,7 @@ class Dataset:
         # take 20 labels for 100 devices to get better clustering
         random.seed(int(id))
         minlabel = self.min_label
-        maxlabel = minlabel + 20
+        maxlabel = minlabel + 19
         my_label = random.randint(minlabel, maxlabel)
 
         # remove my lable from available ones for adding noise
@@ -72,19 +72,19 @@ class Dataset:
 
         if flag == TRAIN:
             self.generated_dist_train = True
-            self.generated_train_idx = self.generated_data_idxs
+            self.generated_train_idx = self.generated_data_idxs.astype(int)
         else:
             self.generated_dist_test = True
-            self.generated_test_idx = self.generated_data_idxs
+            self.generated_test_idx = self.generated_data_idxs.astype(int)
         
 
     def get_training_data(self, id):
         # check if data already generated
         minlabel = self.min_label
         maxlabel = minlabel + 20
-        id = id % maxlabel
+        maj_id = int(id) % maxlabel
         if not self.generated_dist_train:
-            self.generate_data(id, TRAIN)
+            self.generate_data(maj_id, TRAIN)
         idx = self.generated_train_idx
 
         # convert train data to tensor
@@ -99,11 +99,11 @@ class Dataset:
         # check if data already generated
         minlabel = self.min_label
         maxlabel = minlabel + 20
-        id = id % maxlabel
+        maj_id = int(id) % maxlabel
         if not self.generated_dist_test:
-            self.generate_data(id, TEST)
+            self.generate_data(maj_id, TEST)
         idx = self.generated_test_idx
-
+    
         # convert test data to tensor
         _tx = self.test_x[idx]
         _ty = self.test_y[idx]
