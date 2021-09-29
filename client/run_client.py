@@ -178,10 +178,12 @@ def send_summary(args, datacls):
 def start_websocker_server_worker(id, host, port, dataset, datacls, hook, verbose):
     server = websocket_server.WebsocketServerWorker(
         id = id,
-        host = host,
+        host = '0.0.0.0',
         port = port,
         hook = hook,
         verbose = verbose)
+    
+    print("Client:")
 
     # Training data
     train_data, train_targets = datacls.get_training_data(id)
@@ -218,7 +220,7 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--host',
         type=str,
-        default='localhost',
+        default='0.0.0.0',
         help='host on which the websocket server worker should be run: --host 1.2.3.4',
     )
 
