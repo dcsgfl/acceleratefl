@@ -6,3 +6,7 @@ while [ "$i" -lt "$END" ]; do
     i=$((i + 1))
 done
 wait
+
+# Sample command
+# sh run.sh #clients dataset scheduler myip serverip
+# sh run.sh 25 FEMNIST rnd 128.101.118.103 128.101.118.86
