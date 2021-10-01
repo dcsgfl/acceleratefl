@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy.lib.polynomial import poly
+from scipy.signal import savgol_filter
 
 rndfh = open("cifar10_rnd.log")
 pyfh = open("cifar10_py.log")
@@ -14,7 +16,7 @@ oortcontent = oortfh.readlines()
 tiflcontent = tiflfh.readlines()
 
 lineIdx = 0
-nLines = 170
+nLines = 200
 
 rndepoch = []
 rndaccuracy = []
@@ -68,6 +70,13 @@ while (lineIdx < nLines):
 
     lineIdx += 1
 
+window = 19
+polyorder = 3
+rndaccuracysmooth = savgol_filter(rndaccuracy, window, polyorder)
+pyaccuracysmooth = savgol_filter(pyaccuracy, window, polyorder)
+pxyaccuracysmooth = savgol_filter(pxyaccuracy, window, polyorder)
+oortaccuracysmooth = savgol_filter(oortaccuracy, window, polyorder)
+tiflaccuracysmooth = savgol_filter(tiflaccuracy, window, polyorder)
 rndctime = np.cumsum(rndtimes)
 pyctime = np.cumsum(pytimes)
 pxyctime = np.cumsum(pxytimes)
