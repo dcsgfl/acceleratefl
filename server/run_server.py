@@ -240,7 +240,7 @@ async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, 
         max_nr_batches=max_nr_batches,
         epochs=1,           # only run (1 epoch * batch_size samples) for each round
         optimizer="SGD",
-        optimizer_args={"lr": lr},
+        optimizer_args={"lr": lr, "momentum": 0.9},
     )
     #base_latency = 45.0
     #latency =  base_latency + usage
@@ -398,13 +398,13 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
             eval_end_time = time.time()
 
             print("EPOCH:", curr_round, \
-                  "AVG_ACCURACY:", _correct/_total, \
+                  "AVG_ACCURACY:", round(_correct/_total, 8), \
                   "#WORKERS:",     len(selected_worker_instances), \
-                  "SCHED TIME:",   schedule_end_time - schedule_start_time, \
-                  "TRAIN TIME:",   actual_train_time, \
-                  "TOTAL TRAIN:",  schedule_end_time - schedule_start_time + actual_train_time, \
-                  "FIT TIME:",     fit_time, \
-                  "EVAL TIME:",    eval_end_time - eval_start_time)
+                  "SCHED TIME:",   round(schedule_end_time - schedule_start_time, 8), \
+                  "TRAIN TIME:",   round(actual_train_time, 8), \
+                  "TOTAL TRAIN:",  round(schedule_end_time - schedule_start_time + actual_train_time, 8), \
+                  "FIT TIME:",     round(fit_time, 8), \
+                  "EVAL TIME:",    round(eval_end_time - eval_start_time, 8))
 
         # decay learning rate
         learning_rate = max(0.98 * learning_rate, args.lr * 0.01)
