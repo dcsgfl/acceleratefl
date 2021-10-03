@@ -294,7 +294,7 @@ def per_epoch_device_drop(devcentral, n_device_to_drop):
     random.seed(dev_drop_seed)
     dev_drop_seed += 1
 
-    drop_device_keys = random.choice(list(devcentral.available_devices.keys()), n_device_to_drop)
+    drop_device_keys = random.choice(list(devcentral.available_devices.keys()), k = n_device_to_drop)
     for key in drop_device_keys:
         devcentral.available_devices[key]['fail'] = 1
 
