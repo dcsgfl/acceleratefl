@@ -386,14 +386,14 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
 
                 # For Oort
                 global EXPECTED_EPOCH_DURATION
-                expected_fit_time = 1.5 * EXPECTED_EPOCH_DURATION
-                alpha = 15
+                expected_fit_time = EXPECTED_EPOCH_DURATION
+                alpha = 2.0
                 loss = 1.0 - (float(correct) / float(total))
                 global_util = 1.0
-                if expected_fit_time < fit_time:
+                dev_latency = devcentral.available_devices[devid]["cpu_usage"]
+                if expected_fit_time < dev_latency:
                     global_util = (expected_fit_time / fit_time) ** alpha
                 devcentral.available_devices[devid]["util"] = loss * global_util
-
 
             eval_end_time = time.time()
 

@@ -106,6 +106,6 @@ class CIFAR10(Dataset):
 
 
 if __name__ == '__main__':
-    cls = CIFAR10()
 
+    cls = CIFAR10()
     cls.download_data()

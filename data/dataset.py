@@ -8,6 +8,9 @@ import numpy as np
 TRAIN = 1
 TEST = 0
 
+IID_TEST = False
+LABELS_PER_DEV = 10
+
 class Dataset:
     def __init__(self) -> None:
         self.generated_dist_train = False
@@ -18,6 +21,11 @@ class Dataset:
         raise NotImplementedError("ERROR: download_data unimplemented")
     
     def generate_data(self, id, flag):
+
+        if IID_TEST:
+            self.generate_iid_data(id, flag, LABELS_PER_DEV)
+            return
+
         # associate a random constant label with current caller
         # random.seed(1111 + int(id))
         # my_label = random.randint(self.min_label, self.max_label)
@@ -76,7 +84,47 @@ class Dataset:
         else:
             self.generated_dist_test = True
             self.generated_test_idx = self.generated_data_idxs.astype(int)
-        
+
+
+    def generate_iid_data(self, id, flag, numLabels):
+
+        # associate a random set of labels with current caller
+        random.seed(int(id))
+        minlabel = self.min_label
+        maxlabel = minlabel + 10
+        label_list = list(range(minlabel, maxlabel))
+        random.shuffle(label_list)
+        my_labels = label_list[:numLabels]
+
+        # For maintaining same distribution across train and test, same noise percent should be added
+        scenario_index = []
+        if flag == TRAIN:
+            scenario_index = self.indices_train
+        elif flag == TEST:
+            scenario_index = self.indices_test
+        else:
+            sys.exit("Incorrect flag for get_data")
+
+        total_points = 1000
+        points_per_label = int(total_points / numLabels)
+
+        # get index corresponding to my data label and take 90%
+        all_my_label_idxs = tuple()
+        for label in my_labels:
+            candidates = np.where(scenario_index[label])[0]
+            np.random.shuffle(candidates)
+            all_my_label_idxs += tuple(candidates[:points_per_label])
+
+        self.generated_data_idxs = np.array([all_my_label_idxs]).flatten()
+
+        if flag == TRAIN:
+            self.generated_dist_train = True
+            self.generated_train_idx = self.generated_data_idxs.astype(int)
+
+        else:
+            self.generated_dist_test = True
+            self.generated_test_idx = self.generated_data_idxs.astype(int)
+
 
     def get_training_data(self, id):
         # check if data already generated
