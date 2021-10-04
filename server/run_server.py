@@ -339,7 +339,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                 n_device_to_drop = int(devcentral.n_available_devices * args.drop/100.0)
                 if n_device_to_drop != 0:
                     drop_device_keys = per_epoch_device_drop(devcentral, n_device_to_drop)
-                    logging.info('Dropped devices id: ' +  ' '.join(drop_device_keys))
+                    logging.info('EPOCH:' + str(curr_round) + ' Dropped devices id: ' +  ' '.join(drop_device_keys))
                 
                 list_available_devices = [copy.deepcopy(devcentral.available_devices[k]) for k in devcentral.available_devices if devcentral.available_devices[k]['fail'] == 0]
 
@@ -486,6 +486,13 @@ def parse_arguments(args = sys.argv[1:]):
     )
 
     parser.add_argument(
+        '--threshold',
+        type = int,
+        default= 10,
+        help = 'Max client threshold',
+    )
+
+    parser.add_argument(
         '--lr',
         type = float,
         default = 0.1,
@@ -552,7 +559,7 @@ if __name__ == '__main__':
     grpcservice.start()
 
     # train and eval models 
-    client_threshold = 5
+    client_threshold = args.threshold
     asyncio.get_event_loop().run_until_complete(
         train_and_eval(args, devcentral, client_threshold, args.verbose)
     )
