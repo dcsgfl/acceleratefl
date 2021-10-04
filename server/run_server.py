@@ -486,6 +486,13 @@ def parse_arguments(args = sys.argv[1:]):
     )
 
     parser.add_argument(
+        '--threshold',
+        type = int,
+        default= 10,
+        help = 'Max client threshold',
+    )
+
+    parser.add_argument(
         '--lr',
         type = float,
         default = 0.1,
@@ -552,7 +559,7 @@ if __name__ == '__main__':
     grpcservice.start()
 
     # train and eval models 
-    client_threshold = 5
+    client_threshold = args.threshold
     asyncio.get_event_loop().run_until_complete(
         train_and_eval(args, devcentral, client_threshold, args.verbose)
     )
