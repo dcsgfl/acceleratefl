@@ -454,6 +454,13 @@ def parse_arguments(args = sys.argv[1:]):
     )
 
     parser.add_argument(
+        '--threshold',
+        type = int,
+        default= 10,
+        help = 'Max client threshold',
+    )
+
+    parser.add_argument(
         '--lr',
         type = float,
         default = 0.1,
