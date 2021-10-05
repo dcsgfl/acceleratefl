@@ -433,6 +433,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
 
             eval_end_time = time.time()
 
+            logging.info("EPOCH: " + str(curr_round) + " ACCURACY: "+ str(_correct/_total) + " FIT_TIME: " + str(fit_time))
             print("EPOCH:", curr_round, \
                   "AVG_ACCURACY:", round(_correct/_total, 8), \
                   "#WORKERS:",     len(selected_worker_instances), \
