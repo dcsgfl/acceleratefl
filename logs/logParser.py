@@ -70,7 +70,7 @@ while (lineIdx < nLines):
 
     lineIdx += 1
 
-window = 19
+window = 61
 polyorder = 3
 rndaccuracysmooth = savgol_filter(rndaccuracy, window, polyorder)
 pyaccuracysmooth = savgol_filter(pyaccuracy, window, polyorder)
@@ -86,28 +86,28 @@ maxtime = max(max(rndctime), max(pyctime), max(pxyctime), max(oortctime), max(ti
 
 print(max(rndctime), max(pyctime), max(pxyctime), max(oortctime), max(tiflctime))
 
-x_ticks = np.arange(0, 200, 10)
-y_ticks = np.arange(0, 1, 0.1)
-plt.plot(rndepoch, rndaccuracysmooth, label='random')
-plt.plot(rndepoch, pyaccuracysmooth, label = 'py')
-plt.plot(rndepoch, pxyaccuracysmooth, label ='pxy')
-plt.plot(rndepoch, oortaccuracysmooth, label = 'oort')
-plt.plot(rndepoch, tiflaccuracysmooth, label = 'tifl')
-plt.xticks(x_ticks)
-plt.xlabel('Epochs')
-plt.yticks(y_ticks)
-plt.ylabel('Accuracy')
-plt.title('Accuracy vs Epoch')
-plt.legend()
-plt.show()
+# x_ticks = np.arange(0, 200, 10)
+# y_ticks = np.arange(0, 1, 0.1)
+# plt.plot(rndepoch, rndaccuracysmooth, label='random')
+# plt.plot(rndepoch, pyaccuracysmooth, label = 'py')
+# plt.plot(rndepoch, pxyaccuracysmooth, label ='pxy')
+# plt.plot(rndepoch, oortaccuracysmooth, label = 'oort')
+# plt.plot(rndepoch, tiflaccuracysmooth, label = 'tifl')
+# plt.xticks(x_ticks)
+# plt.xlabel('Epochs')
+# plt.yticks(y_ticks)
+# plt.ylabel('Accuracy')
+# plt.title('Accuracy vs Epoch')
+# plt.legend()
+# plt.show()
 
 x_ticks = np.arange(0, maxtime, 1500)
 y_ticks = np.arange(0, 1, 0.1)
-plt.plot(rndctime, rndaccuracysmooth, label = 'random')
-plt.plot(pyctime, pyaccuracysmooth, label = 'py')
-plt.plot(pxyctime, pxyaccuracysmooth, label = 'pxy')
-plt.plot(oortctime, oortaccuracysmooth, label = 'oort')
-plt.plot(tiflctime, tiflaccuracysmooth, label = 'tifl')
+plt.plot(rndctime, rndaccuracysmooth, '-.',  label = r'Random')
+plt.plot(pyctime, pyaccuracysmooth, '>',  label = r'P(y)')
+plt.plot(pxyctime, pxyaccuracysmooth, '-', label = r'P(X|y)')
+plt.plot(tiflctime, tiflaccuracysmooth, '--',  label = r'TiFL')
+plt.plot(oortctime, oortaccuracysmooth, '+',  label = r'Oort')
 plt.xticks(x_ticks)
 plt.xlabel('Time taken (sec)')
 plt.yticks(y_ticks)
