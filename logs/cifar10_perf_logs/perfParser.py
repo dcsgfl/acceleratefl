@@ -103,7 +103,7 @@ print("P(X|Y) TTC: ", pxyCTime)
 print("TiFL   TTC: ", tiflCTime)
 print("Oort   TTC: ", oortCTime)
 
-window = 171
+window = 121
 polyorder = 3
 rndaccuracysmooth = savgol_filter(rndaccuracy, window, polyorder)
 pyaccuracysmooth = savgol_filter(pyaccuracy, window, polyorder)
