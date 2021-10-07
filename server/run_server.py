@@ -108,6 +108,8 @@ usage_array = generateDelays(110)
 usage_iter = 0
 
 id_count = 1
+dev_drop_seed = 1
+
 class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
     
     def __init__(self, args):
@@ -287,6 +289,20 @@ def set_worker_conn(hook, available_devices, available_instances, verbose):
             clientWorker.clear_objects_remote()
             available_instances[devid] = clientWorker
 
+def per_epoch_device_drop(devcentral, n_device_to_drop):
+    global dev_drop_seed
+    random.seed(dev_drop_seed)
+    dev_drop_seed += 1
+
+    drop_device_keys = random.choices(list(devcentral.available_devices.keys()), k = n_device_to_drop)
+    for key in drop_device_keys:
+        devcentral.available_devices[key]['fail'] = 1
+
+    return drop_device_keys
+
+def per_epoch_recover_device(devcentral, drop_device_keys):
+    for key in drop_device_keys:
+        devcentral.available_devices[key]['fail'] = 0
 
 async def train_and_eval(args, devcentral, client_threshold, verbose):
    
@@ -318,7 +334,23 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
         while True:
             devcentral.lock("train block 2")
             if devcentral.n_available_devices == devcentral.n_device_summaries:
-                available_devices = copy.deepcopy(devcentral.available_devices)
+                # drop devices
+                n_device_to_drop = int(devcentral.n_available_devices * args.drop/100.0)
+                if n_device_to_drop != 0:
+                    drop_device_keys = per_epoch_device_drop(devcentral, n_device_to_drop)
+                    logging.info('EPOCH:' + str(curr_round) + ' Dropped devices id: ' +  ' '.join(drop_device_keys))
+                
+                list_available_devices = [copy.deepcopy(devcentral.available_devices[k]) for k in devcentral.available_devices if devcentral.available_devices[k]['fail'] == 0]
+
+                # Recover devices
+                if n_device_to_drop != 0:
+                    per_epoch_recover_device(devcentral, drop_device_keys)
+
+                # available devices for this epoch
+                available_devices = {}
+                for dev in list_available_devices:
+                    available_devices[dev['id']] = dev.copy()
+
                 devcentral.unlock()
                 time.sleep(3)
                 break
@@ -474,6 +506,13 @@ def parse_arguments(args = sys.argv[1:]):
         type = str,
         default = 'RNDSched',
         help = 'Scheduler type',
+    )
+
+    parser.add_argument(
+        '--drop',
+        type = float,
+        default = 0.0,
+        help = 'Device drop percentage',
     )
 
     parser.add_argument(
