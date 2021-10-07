@@ -46,12 +46,15 @@ def cluster_hist(histogramList, keySpace):
 
     for i in range(dim):
         for j in range(i, dim):
-            dist = hdist(X[i,:], X[j,:])
+            #dist = hdist(X[i,:], X[j,:])
+            dist = norm(X[i,:] - X[j,:])
             distMat[i,j] = dist
             distMat[j,i] = dist
 
-    return OPTICS(min_samples=2,
+    return OPTICS(min_samples=2,cluster_method="dbscan",eps=0.25,
                   metric="precomputed").fit_predict(distMat)
+    #return OPTICS(min_samples=2,
+    #              metric="precomputed").fit_predict(distMat)
 
 """
 Basic clustering routine for clustering a list of histograms.
