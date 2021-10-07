@@ -143,6 +143,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
             self.available_devices[id]['id'] = id
             self.available_devices[id]['ip'] = request.ip
             self.available_devices[id]['flport'] = request.flport
+            self.available_devices[id]['fail'] = 0
             self.n_available_devices += 1
         self.unlock()
 
