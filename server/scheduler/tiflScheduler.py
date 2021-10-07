@@ -60,6 +60,7 @@ class TIFLSched(Scheduler):
             if dev['tifl_tier'] == tierStr:
                 keys.append(devKey)
 
+        print('keys: ', keys, ' numDevs:', numDevs)
         samp = random.sample(keys, numDevs)
         for key in samp:
             selected_devices[key] = available_devices[key].copy()
