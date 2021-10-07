@@ -60,6 +60,7 @@ class TIFLSched(Scheduler):
             if dev['tifl_tier'] == tierStr:
                 keys.append(devKey)
 
+        numDevs = min(numDevs, len(keys))
         samp = random.sample(keys, numDevs)
         for key in samp:
             selected_devices[key] = available_devices[key].copy()
@@ -73,6 +74,7 @@ class TIFLSched(Scheduler):
         self.n_tiers = min(n_available_devices, 5)
         self.tier_probs = np.ones(self.n_tiers) / float(self.n_tiers)
         self.tier_credits = np.array([80, 50, 30, 20, 20])
+        #self.tier_credits = np.array([160, 100, 60, 40, 40])
         self.tier_counts = np.zeros(self.n_tiers)
 
         devsPerTier = int(n_available_devices / int(self.n_tiers))
