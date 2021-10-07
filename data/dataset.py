@@ -25,7 +25,7 @@ class Dataset:
         # take 20 labels for 100 devices to get better clustering
         random.seed(int(id))
         minlabel = self.min_label
-        maxlabel = minlabel + 9
+        maxlabel = minlabel + 19
         my_label = random.randint(minlabel, maxlabel)
 
         # remove my lable from available ones for adding noise
@@ -81,7 +81,7 @@ class Dataset:
     def get_training_data(self, id):
         # check if data already generated
         minlabel = self.min_label
-        maxlabel = minlabel + 10
+        maxlabel = minlabel + 20
         maj_id = int(id) % maxlabel
         if not self.generated_dist_train:
             self.generate_data(maj_id, TRAIN)
@@ -98,7 +98,7 @@ class Dataset:
     def get_testing_data(self, id):
         # check if data already generated
         minlabel = self.min_label
-        maxlabel = minlabel + 10
+        maxlabel = minlabel + 20
         maj_id = int(id) % maxlabel
         if not self.generated_dist_test:
             self.generate_data(maj_id, TEST)
