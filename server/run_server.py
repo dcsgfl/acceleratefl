@@ -45,7 +45,7 @@ from modelFactory import ModelFactory as mdlftry
 from schedulerFactory import SchedulerFactory as schedftry
 
 LOCK_TRACE = False
-EXPECTED_EPOCH_DURATION = 10.0
+EXPECTED_EPOCH_DURATION = 60.0
 
 def generateNetworkDelays(n=30):
 
