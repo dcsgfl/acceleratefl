@@ -45,7 +45,7 @@ from modelFactory import ModelFactory as mdlftry
 from schedulerFactory import SchedulerFactory as schedftry
 
 LOCK_TRACE = False
-EXPECTED_EPOCH_DURATION = 60.0
+EXPECTED_EPOCH_DURATION = 10.0
 
 def generateNetworkDelays(n=30):
 
@@ -424,7 +424,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
 
                 # For Oort
                 global EXPECTED_EPOCH_DURATION
-                expected_fit_time = 1.5 * EXPECTED_EPOCH_DURATION
+                expected_fit_time = 6 * EXPECTED_EPOCH_DURATION
                 alpha = 2.0
                 loss = 1.0 - (float(correct) / float(total))
                 global_util = 1.0
