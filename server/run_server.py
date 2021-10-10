@@ -424,7 +424,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
 
                 # For Oort
                 global EXPECTED_EPOCH_DURATION
-                expected_fit_time = 6 * EXPECTED_EPOCH_DURATION
+                expected_fit_time = 3 * EXPECTED_EPOCH_DURATION
                 alpha = 2.0
                 loss = 1.0 - (float(correct) / float(total))
                 global_util = 1.0
