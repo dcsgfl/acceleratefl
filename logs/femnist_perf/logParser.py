@@ -70,7 +70,7 @@ while (lineIdx < nLines):
 
     lineIdx += 1
 
-window = 61
+window = 131
 polyorder = 3
 rndaccuracysmooth = savgol_filter(rndaccuracy, window, polyorder)
 pyaccuracysmooth = savgol_filter(pyaccuracy, window, polyorder)
