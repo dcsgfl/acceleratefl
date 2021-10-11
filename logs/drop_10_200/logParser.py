@@ -70,7 +70,7 @@ while (lineIdx < nLines):
 
     lineIdx += 1
 
-window = 101
+window = 81
 polyorder = 3
 rndaccuracysmooth = savgol_filter(rndaccuracy, window, polyorder)
 pyaccuracysmooth = savgol_filter(pyaccuracy, window, polyorder)
@@ -96,6 +96,6 @@ plt.xticks(x_ticks)
 plt.xlabel('Time taken (sec)')
 plt.yticks(y_ticks)
 plt.ylabel('Accuracy')
-plt.title('Accuracy vs Time taken')
+# plt.title('Accuracy vs Time taken')
 plt.legend()
 plt.show()
