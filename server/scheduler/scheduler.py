@@ -50,7 +50,7 @@ class Scheduler:
         cdevs = {}
 
         RHO = 0.5   # Weight loss and latency reduction equally
-        USE_QUASI_RANDOM = False
+        USE_QUASI_RANDOM = True
 
         #
         # Compute the total loss in each cluster
@@ -141,8 +141,9 @@ class Scheduler:
 
                 if len(devs) == 0:
                     # Remove this cluster from consideration
-                    del clusters[i]
-                    del probs[i]
+                    # del clusters[i]
+                    # del probs[i]
+                    probs[idx] = 0.0
 
             while len(selectedClusters) < client_threshold:
                 clust = choices(clusters, weights=probs)[0]
@@ -155,8 +156,10 @@ class Scheduler:
 
                 if len(devs) == 0:
                     # Remove this cluster from consideration
-                    del clusters[i]
-                    del probs[i]
+                    # del clusters[i]
+                    # del probs[i]
+                    cidx = clusters.index(clust)
+                    probs[cidx] = 0.0
 
         else:
 
@@ -175,8 +178,9 @@ class Scheduler:
                 del devs[0]
                 if len(devs) == 0:
                     # Remove this cluster from consideration
-                    del clusters[idx]
-                    del probs[idx]
+                    # del clusters[idx]
+                    # del probs[idx]
+                    probs[idx] = 0.0
 
         #print("Scheduled clusters: ", ' '.join(map(str, selectedClusters)))
         return selected
