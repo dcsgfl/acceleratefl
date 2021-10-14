@@ -8,6 +8,8 @@ UMN DCSG, 2021
 import math
 from random import choices
 
+import numpy as np
+
 """
 All schedulers should implement the following interfaces
 """
@@ -47,7 +49,8 @@ class Scheduler:
         clat  = {}
         cdevs = {}
 
-        RHO = 0.6   # Weight loss and latency reduction equally
+        RHO = 0.5   # Weight loss and latency reduction equally
+        USE_QUASI_RANDOM = True
 
         #
         # Compute the total loss in each cluster
@@ -91,6 +94,8 @@ class Scheduler:
             normLoss = closs[cid] / totalLoss
             p = RHO*latRed + (1.0 - RHO)*normLoss
 
+            #print("cluster",cid,"latRed",round(latRed,6),"loss",round(normLoss,6),"weight",round(p,6))
+
             clusters.append(cid)
             probs.append(p)
 
@@ -114,28 +119,69 @@ class Scheduler:
         # Sample clusters and select the best devices
         #
         selected = {}
+        selectedClusters = []
+        normProbs = np.array(probs) / float(sum(probs))
 
-        count = client_threshold
-        for i in range(count):
+        if USE_QUASI_RANDOM:
 
-            idx = choices(range(len(clusters)), weights=probs)[0]
-            clust = clusters[idx]
-            devs = cdevs[clust]
-            dev = devs[0]    # this will just work if sorted jsw
+            # OK let's take the guesswork out of this...
+            # time for some quasi-random draws
+            for idx, cid in enumerate(clusters):
 
-            if dev['loss'] > 0.0:
+                expected = int(normProbs[idx] * client_threshold)
+
+                devs = cdevs[cid]
+                ccnt = min(expected, len(devs))
+
+                for i in range(ccnt):
+                    dev = devs[0]
+                    selected[dev['id']] = dev
+                    selectedClusters.append(str(cid))
+                    del devs[0]
+
+                if len(devs) == 0:
+                    # Remove this cluster from consideration
+                    # del clusters[i]
+                    # del probs[i]
+                    probs[idx] = 0.0
+
+            while len(selectedClusters) < client_threshold:
+                clust = choices(clusters, weights=probs)[0]
+                devs = cdevs[clust]
+
+                dev = devs[0]
                 selected[dev['id']] = dev
+                selectedClusters.append(str(clust))
+                del devs[0]
 
-            del devs[0]
-            if len(devs) == 0:
+                if len(devs) == 0:
+                    # Remove this cluster from consideration
+                    # del clusters[i]
+                    # del probs[i]
+                    cidx = clusters.index(clust)
+                    probs[cidx] = 0.0
 
-                # Remove this cluster from consideration
-                del clusters[idx]
-                p = probs[idx]
-                del probs[idx]
+        else:
 
-                for i2 in range(len(probs)):
-                    probs[i2] += (p / float(len(probs)))
+            count = client_threshold
+            for i in range(count):
 
+                idx = choices(range(len(clusters)), weights=probs)[0]
+                clust = clusters[idx]
+                devs = cdevs[clust]
+                dev = devs[0]    # this will just work if sorted jsw
+
+                if dev['loss'] > 0.0:
+                    selected[dev['id']] = dev
+                    selectedClusters.append(str(clust))
+
+                del devs[0]
+                if len(devs) == 0:
+                    # Remove this cluster from consideration
+                    # del clusters[idx]
+                    # del probs[idx]
+                    probs[idx] = 0.0
+
+        #print("Scheduled clusters: ", ' '.join(map(str, selectedClusters)))
         return selected
 
