@@ -47,7 +47,7 @@ class Scheduler:
         clat  = {}
         cdevs = {}
 
-        RHO = 0.9   # Weight loss and latency reduction equally
+        RHO = 0.6   # Weight loss and latency reduction equally
 
         #
         # Compute the total loss in each cluster
