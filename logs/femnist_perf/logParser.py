@@ -72,16 +72,48 @@ while (lineIdx < nLines):
 
 window = 131
 polyorder = 3
+# rndaccuracysmooth = savgol_filter(rndaccuracy, window, polyorder)
+# pyaccuracysmooth = savgol_filter(pyaccuracy, window, polyorder)
+# pxyaccuracysmooth = savgol_filter(pxyaccuracy, window, polyorder)
+# oortaccuracysmooth = savgol_filter(oortaccuracy, window, polyorder)
+# tiflaccuracysmooth = savgol_filter(tiflaccuracy, window, polyorder)
+# rndctime = np.cumsum(rndtimes)
+# pyctime = np.cumsum(pytimes)
+# pxyctime = np.cumsum(pxytimes)
+# oortctime = np.cumsum(oorttimes)
+# tiflctime = np.cumsum(tifltimes)
+percent = 0.8
+
 rndaccuracysmooth = savgol_filter(rndaccuracy, window, polyorder)
+resrnd = [i for i,v in enumerate(rndaccuracysmooth) if v > percent]
+
 pyaccuracysmooth = savgol_filter(pyaccuracy, window, polyorder)
+respy = [i for i,v in enumerate(pyaccuracysmooth) if v > percent]
+
 pxyaccuracysmooth = savgol_filter(pxyaccuracy, window, polyorder)
-oortaccuracysmooth = savgol_filter(oortaccuracy, window, polyorder)
+respxy = [i for i,v in enumerate(pxyaccuracysmooth) if v > percent]
+
 tiflaccuracysmooth = savgol_filter(tiflaccuracy, window, polyorder)
+restifl = [i for i,v in enumerate(tiflaccuracysmooth) if v > percent]
+
+oortaccuracysmooth = savgol_filter(oortaccuracy, window, polyorder)
+resoort = [i for i,v in enumerate(oortaccuracysmooth) if v > percent]
+
 rndctime = np.cumsum(rndtimes)
+print(rndctime[resrnd[0]])
+
 pyctime = np.cumsum(pytimes)
+print(pyctime[respy[0]])
+
 pxyctime = np.cumsum(pxytimes)
-oortctime = np.cumsum(oorttimes)
+print(pxyctime[respxy[0]])
+
 tiflctime = np.cumsum(tifltimes) 
+print(tiflctime[restifl[0]])
+
+oortctime = np.cumsum(oorttimes)
+print(oortctime[resoort[0]])
+
 maxtime = max(max(rndctime), max(pyctime), max(pxyctime), max(oortctime), max(tiflctime))
 
 print(max(rndctime), max(pyctime), max(pxyctime), max(oortctime), max(tiflctime))

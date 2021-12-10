@@ -73,16 +73,35 @@ while (lineIdx < nLines):
 window = 81
 polyorder = 3
 rndaccuracysmooth = savgol_filter(rndaccuracy, window, polyorder)
+resrnd = [i for i,v in enumerate(rndaccuracysmooth) if v > 0.5]
+
 pyaccuracysmooth = savgol_filter(pyaccuracy, window, polyorder)
+respy = [i for i,v in enumerate(pyaccuracysmooth) if v > 0.5]
+
 pxyaccuracysmooth = savgol_filter(pxyaccuracy, window, polyorder)
+respxy = [i for i,v in enumerate(pxyaccuracysmooth) if v > 0.5]
+
 tiflaccuracysmooth = savgol_filter(tiflaccuracy, window, polyorder)
+restifl = [i for i,v in enumerate(tiflaccuracysmooth) if v > 0.5]
+
 oortaccuracysmooth = savgol_filter(oortaccuracy, window, polyorder)
+resoort = [i for i,v in enumerate(oortaccuracysmooth) if v > 0.5]
 
 rndctime = np.cumsum(rndtimes)
+print(rndctime[resrnd[0]])
+
 pyctime = np.cumsum(pytimes)
+print(pyctime[respy[0]])
+
 pxyctime = np.cumsum(pxytimes)
+print(pxyctime[respxy[0]])
+
 tiflctime = np.cumsum(tifltimes) 
+print(tiflctime[restifl[0]])
+
 oortctime = np.cumsum(oorttimes)
+print(oortctime[resoort[0]])
+
 maxtime = max(max(rndctime), max(pyctime), max(pxyctime),  max(tiflctime), max(oortctime))
 
 x_ticks = np.arange(0, maxtime, 1500)
