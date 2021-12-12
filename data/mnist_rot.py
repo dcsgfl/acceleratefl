@@ -35,16 +35,17 @@ class MNIST_ROT(Dataset):
         # Download mnist zip files if non-existent
         for zipf in self.zip:
             if zipf not in os.listdir(self.path):
-                urlretrieve(urllib.parse.urljoin(self.url, zipfile), os.path.join(self.path, zipf))
+                urlretrieve(urllib.parse.urljoin(self.url, zipf), os.path.join(self.path, zipf))
                 print('Downloaded ', zipf, ' from ', self.url)
         
         # Retrieve train and test data from amat files
-        with zipfile.Zipfile(os.path.join(self.path, zipf)) as zp:
+        with zipfile.ZipFile(os.path.join(self.path, zipf)) as zp:
             tmp = np.loadtxt(zp.open(self.train_file))
-            self.train_x, self.train_y = tmp[:, :-1].copy(), tmp[:, -1].copy()
+            self.train_x, self.train_y = tmp[:, :-1].copy().reshape(-1, 28, 28), tmp[:, -1].copy().astype(np.uint8)
             tmp = np.loadtxt(zp.open(self.test_file))
-            self.test_x, self.test_y = tmp[:, :-1].copy(), tmp[:, -1].copy()
-            self.trainy = self.train_y.reshape((-1, 1))
+            print(self.train_x[0].shape)
+            self.test_x, self.test_y = tmp[:, :-1].copy().reshape(-1, 28, 28), tmp[:, -1].copy().astype(np.uint8)
+            self.train_y = self.train_y.reshape((-1, 1))
             self.test_y = self.test_y.reshape((-1, 1))
 
         # get unique label count
@@ -59,9 +60,9 @@ class MNIST_ROT(Dataset):
         self.indices_train = [[] for x in range(self.n_unique_labels)]
         self.indices_test = [[] for x in range(self.n_unique_labels)]
         for i in range(self.n_unique_labels):
-            self.indices_train[i] = np.isin(self.train_y, [i])
+            self.indices_train[i] = np.where(np.isin(self.train_y, [i]))[0]
         for i in range(self.n_unique_labels):
-            self.indices_test[i] = np.isin(self.test_y, [i])
+            self.indices_test[i] = np.where(np.isin(self.test_y, [i]))[0]
 
         return True
 

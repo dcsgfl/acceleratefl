@@ -25,7 +25,7 @@ class Dataset:
         # take 20 labels for 100 devices to get better clustering
         random.seed(int(id))
         minlabel = self.min_label
-        maxlabel = minlabel + 19
+        maxlabel = minlabel + 9
         my_label = random.randint(minlabel, maxlabel)
 
         # remove my lable from available ones for adding noise
@@ -42,7 +42,7 @@ class Dataset:
             sys.exit("Incorrect flag for get_data")
 
         # get index corresponding to my data label and take 90%
-        all_my_label_idxs = tuple(np.where(scenario_index[my_label])[0])
+        all_my_label_idxs = tuple(scenario_index[my_label])
 
         # take 80-90% data of my label and then add 12/7/6 % noise of the 80-90% data
         # 80-90% == 100 % train data
@@ -81,7 +81,7 @@ class Dataset:
     def get_training_data(self, id):
         # check if data already generated
         minlabel = self.min_label
-        maxlabel = minlabel + 20
+        maxlabel = minlabel + 10
         maj_id = int(id) % maxlabel
         if not self.generated_dist_train:
             self.generate_data(maj_id, TRAIN)
@@ -98,7 +98,7 @@ class Dataset:
     def get_testing_data(self, id):
         # check if data already generated
         minlabel = self.min_label
-        maxlabel = minlabel + 20
+        maxlabel = minlabel + 10
         maj_id = int(id) % maxlabel
         if not self.generated_dist_test:
             self.generate_data(maj_id, TEST)
