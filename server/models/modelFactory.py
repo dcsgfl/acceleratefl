@@ -1,10 +1,4 @@
-from AlexNet import AlexNet
-from DenseNet import DenseNet
-from GoogleNet import GoogleNet
 from LeNet import LeNet
-from ResNet import ResNet
-from VGG import VGG
-from WideResNet import WideResNet
 
 class ModelFactory:
     factories = {}
