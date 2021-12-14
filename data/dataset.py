@@ -23,6 +23,10 @@ class Dataset:
         random.seed(int(devid))
         minlabel = self.min_label
         maxlabel = minlabel + 19
+
+        # Ignoring the parm for now to avoid round robin.
+        # This should add different sized clusters
+        #my_label = maj_id
         my_label = random.randint(minlabel, maxlabel)
 
         # remove my lable from available ones for adding noise
