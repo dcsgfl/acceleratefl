@@ -13,6 +13,8 @@ from dataset import Dataset
 from random import seed
 from random import random
 
+import matplotlib.pyplot as plt
+
 ######constants######
 # Absolute path of "data" directory 
 DATADIR = os.path.join(os.path.abspath(os.path.dirname(__file__)))
@@ -62,6 +64,11 @@ class MNIST(Dataset):
 
         # remove the mnist directory after use
         # shutil.rmtree(self.path)
+        fig = plt.figure
+        plt.imshow(self.train_x[0], cmap='gray')
+        plt.show()
+
+        print(len(self.train_x))
 
         # get unique label count
         self.unique_labels = list(np.unique(self.train_y))
