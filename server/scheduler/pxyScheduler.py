@@ -61,9 +61,21 @@ class PXYSched(Scheduler):
             #logging.info("cpu_usage")
             #logging.info(all_devices[devId]['cpu_usage'])
 
+        print("Cluster Info:")
         for clustId in self.cluster_info.keys():
             num = float(self.cluster_info[clustId]["count"])
             self.cluster_info[clustId]["prop"] = num / float(len(dev_keys))
+            print("  ",clustId,": ",num)
+
+        print("Dev Info:")
+        for clustId in self.cluster_info.keys():
+            print("  ",clustId,": ",sep="",end="")
+
+            for devId in dev_keys:
+                if all_devices[devId]['cluster'] == clustId:
+                    print(devId," ",sep="",end="")
+
+            print()
 
         logging.info("CLUSTERS ASSIGNED: " + str(Counter(dev_clusters)))
 
@@ -76,6 +88,7 @@ class PXYSched(Scheduler):
             self.do_clustering(available_devices)
 
         return self._schedule_clusters(self.cluster_info, available_devices, client_threshold)
+        #return self._schedule_clusters_v2(self.cluster_info, available_devices, client_threshold)
         # This is a little slow... (n^2) but just moving on for now
         #selected_devices = {}
         #for clusterId in self.cluster_ids: # For each identified cluster
