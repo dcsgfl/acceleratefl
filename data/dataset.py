@@ -20,21 +20,17 @@ class Dataset:
     def download_data(self):
         raise NotImplementedError("ERROR: download_data unimplemented")
     
-    def generate_data(self, id, flag):
+    def generate_data(self, devid, maj_id, flag):
 
         if IID_TEST:
-            self.generate_iid_data(id, flag, LABELS_PER_DEV)
+            self.generate_iid_data(devid, flag, LABELS_PER_DEV)
             return
 
-        # associate a random constant label with current caller
-        # random.seed(1111 + int(id))
-        # my_label = random.randint(self.min_label, self.max_label)
-
         # take 20 labels for 100 devices to get better clustering
-        random.seed(int(id))
+        random.seed(int(devid))
         minlabel = self.min_label
         maxlabel = minlabel + 9
-        my_label = random.randint(minlabel, maxlabel)
+        my_label = maj_id
 
         # remove my lable from available ones for adding noise
         noise_labels = [*range(minlabel, maxlabel + 1, 1)]
@@ -132,7 +128,7 @@ class Dataset:
         maxlabel = minlabel + 10
         maj_id = int(id) % maxlabel
         if not self.generated_dist_train:
-            self.generate_data(maj_id, TRAIN)
+            self.generate_data(id, maj_id, TRAIN)
         idx = self.generated_train_idx
 
         # convert train data to tensor
@@ -149,7 +145,7 @@ class Dataset:
         maxlabel = minlabel + 10
         maj_id = int(id) % maxlabel
         if not self.generated_dist_test:
-            self.generate_data(maj_id, TEST)
+            self.generate_data(id, maj_id, TEST)
         idx = self.generated_test_idx
     
         # convert test data to tensor
