@@ -45,14 +45,7 @@ class MNIST_ROT(Dataset):
             tmp = np.loadtxt(zp.open(self.train_file))
             self.train_x, self.train_y = tmp[:, :-1].copy().reshape(-1, 28, 28), tmp[:, -1].copy().astype(np.uint8)
             tmp = np.loadtxt(zp.open(self.test_file))
-            print(self.train_x[0].shape)
-            print(type(self.train_x[0][0]))
-            fig = plt.figure
-            plt.imshow(self.train_x[0], cmap='gray')
-            plt.show()
             self.test_x, self.test_y = tmp[:, :-1].copy().reshape(-1, 28, 28), tmp[:, -1].copy().astype(np.uint8)
-            self.train_y = self.train_y.reshape((-1, 1))
-            self.test_y = self.test_y.reshape((-1, 1))
 
         # get unique label count
         self.unique_labels = list(np.unique(self.train_y))

@@ -64,11 +64,6 @@ class MNIST(Dataset):
 
         # remove the mnist directory after use
         # shutil.rmtree(self.path)
-        fig = plt.figure
-        plt.imshow(self.train_x[0], cmap='gray')
-        plt.show()
-
-        print(len(self.train_x))
 
         # get unique label count
         self.unique_labels = list(np.unique(self.train_y))
