@@ -71,14 +71,15 @@ class MNIST_ROT_OWN(Dataset):
         # shutil.rmtree(self.path)
 
         train_rot_x = []
+        rotation_angles = [0.0, 15.0, 30.0]
         for img in self.train_x:
-            angle = np.random.uniform(0, 15.0)
+            angle = np.random.choice(rotation_angles)
             new_img = ndimage.rotate(img, angle, reshape=False, cval=0.0)
             train_rot_x.append(new_img)
 
         test_rot_x = []
         for img in self.test_x:
-            angle = np.random.uniform(0, 15.0)
+            angle = np.random.choice(rotation_angles)
             new_img = ndimage.rotate(img, angle, reshape=False, cval=0.0)
             test_rot_x.append(new_img)
         
