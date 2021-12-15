@@ -51,7 +51,7 @@ class Dataset:
         num_80_90_idxs = int(len(all_my_label_idxs) * percent)
 
         #take 75% of 80-90% as majority
-        num_75_idxs = int(num_80_90_idxs * 0.75)
+        num_75_idxs = int(num_80_90_idxs * 0.90)
         pruned_my_label_idxs = all_my_label_idxs[:num_75_idxs]
 
         selected_noise_idxs = []
