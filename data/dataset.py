@@ -55,7 +55,7 @@ class Dataset:
         pruned_my_label_idxs = all_my_label_idxs[:num_75_idxs]
 
         selected_noise_idxs = []
-        noise_percents = [0.12, 0.07, 0.06]
+        noise_percents = [0.04, 0.03, 0.03]
         for p in noise_percents:
             # select a random noise label and remove it from existing noise list 
             selected_noise_label = random.choice(noise_labels)
