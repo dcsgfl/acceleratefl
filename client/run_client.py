@@ -120,7 +120,7 @@ def send_summary(args, datacls):
         for label in labelSpace:
             histInput[label] = []
 
-        if args.dataset.upper() == "CIFAR10" or args.dataset.upper() == "MNIST_ROT":
+        if args.dataset.upper() == "CIFAR10" or args.dataset.upper() == "MNIST_ROT" or args.dataset.upper() == "MNIST_ROT_OWN":
 
             for yIdx in range(len(train_y)):
                 label = str(train_y[yIdx])
