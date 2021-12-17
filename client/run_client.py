@@ -98,7 +98,7 @@ def send_summary(args, datacls):
 
     global DP_EPSILON
 
-    tensor_train_x, tensor_train_y = datacls.get_training_data(devid)
+    tensor_train_x, tensor_train_y, rot = datacls.get_training_data(devid)
     train_y = tensor_train_y.numpy()
     summaryType = args.summary.lower()
     summaryPayload = ""
@@ -125,7 +125,7 @@ def send_summary(args, datacls):
             for yIdx in range(len(train_y)):
                 label = str(train_y[yIdx])
                 xarr = train_x[yIdx,:].flatten()
-                counts, xLabels = np.histogram(xarr, bins=20, range=(0,1))
+                counts, xLabels = np.histogram(xarr, bins=100, range=(0,1))
                 sd = []
                 for xIdx, numericLabel in enumerate(xLabels[:-1]):
                     count = counts[xIdx]
