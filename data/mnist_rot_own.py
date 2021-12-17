@@ -71,19 +71,31 @@ class MNIST_ROT_OWN(Dataset):
         # shutil.rmtree(self.path)
 
         train_rot_x = []
-        rotation_angles = [0.0, 15.0, 30.0]
+        train_rot = []
+
+        #rotation_angles = [0.0, 15.0, 30.0]
+        rotation_angles = [0.0, 30.0]
         for img in self.train_x:
             angle = np.random.choice(rotation_angles)
+            train_rot.append(angle)
             new_img = ndimage.rotate(img, angle, reshape=False, cval=0.0)
             train_rot_x.append(new_img)
 
         test_rot_x = []
+        test_rot = []
+
         for img in self.test_x:
             angle = np.random.choice(rotation_angles)
+            test_rot.append(angle)
             new_img = ndimage.rotate(img, angle, reshape=False, cval=0.0)
             test_rot_x.append(new_img)
         
+        self.train_x = np.asarray(train_rot_x)
         self.test_x = np.asarray(test_rot_x)
+
+        self.train_rot = np.array(train_rot)
+        self.test_rot = np.array(test_rot)
+
         train_rot_x = []
         test_rot_x = []
 
@@ -113,6 +125,7 @@ class MNIST_ROT_OWN(Dataset):
 
 
 if __name__ == '__main__':
+
     cls = MNIST_ROT_OWN()
 
     cls.download_data()

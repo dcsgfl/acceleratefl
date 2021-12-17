@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import copy
 import os
 import sys
 
@@ -13,7 +14,11 @@ pwd = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', '..', 'comm
 sys.path.append(pwd)
 
 from cluster import cluster_hist
+from cluster import cluster_mat
+
 from hist import HistSummary
+from hist import HistMatSummary
+
 import numpy as np
 
 NEXT_DEV_ID = 1
@@ -28,32 +33,57 @@ def getNextId():
 def generatePy(datacls):
 
     devid = getNextId()
-    _, _ = datacls.get_training_data(devid)
-    _, _ = datacls.get_testing_data(devid)
+    _, _, _ = datacls.get_training_data(devid)
+    _, _, _ = datacls.get_testing_data(devid)
 
-    tensor_train_x, tensor_train_y = datacls.get_training_data(devid)
+    tensor_train_x, tensor_train_y, rot = datacls.get_training_data(devid)
     train_y = tensor_train_y.numpy()
+
+    train_x = tensor_train_x.numpy()
 
     counts = np.bincount(train_y)
     target = str(np.argmax(counts))
 
-    histInput = list(map(str, train_y.tolist()))
-    return devid, target, HistSummary(histInput)
+    #histInput = list(map(str, train_y.tolist()))
+    #return devid, target, rot, HistSummary(histInput)
 
-def genDevices(count, eps=1.0):
+    histInput = {}
+    histMatInput = {}
+
+    labelSpace = list(map(str, np.unique(train_y)))
+    for label in labelSpace:
+        histInput[label] = []
+
+    for yIdx in range(len(train_y)):
+        label = str(train_y[yIdx])
+        xarr = train_x[yIdx,:].flatten()
+        counts, xLabels = np.histogram(xarr, bins=100, range=(0,1))
+        sd = []
+        for xIdx, numericLabel in enumerate(xLabels[:-1]):
+            count = counts[xIdx]
+            xLab = "b" + str(numericLabel)
+            sd = sd + count*[xLab]
+
+        histInput[label] += sd
+
+    for label in labelSpace:
+        hip = histInput[label]
+        histMatInput[label] = HistSummary(hip)
+
+    return devid, target, rot, HistMatSummary(histMatInput)
+
+def genDevices(count, datacls, eps=1.0):
 
     devs = {}
     labels = set()
 
     for i in range(count):
 
-        datacls = dftry.getDataset("MNIST")
-        datacls.download_data()
-
-        devid, target, hs = generatePy(datacls)
-        devs[devid] = [target, hs]
+        devid, target, rot, hs = generatePy(datacls)
+        devs[devid] = [target, hs, rot]
 
         labels = labels.union(hs.getKeys())
+        datacls.clear()
 
     return labels, devs
 
@@ -75,14 +105,35 @@ def getTrueClusters(devs, labelSpace):
 
     return clust
 
-def predictClusters(devs, labels):
+def predictClusters(devs):
 
-    hlist = []
-    for devid in devs.keys():
-        hlist.append(devs[devid][1])
+    n_available_devices = len(devs)
+    xKeyspace = set([])
+    yKeyspace = set([])
+    summaries = []
 
-    classes = cluster_hist(hlist, labels)
-    return classes
+    # We need a deterministic ordering of keys
+    dev_keys = copy.deepcopy(list(devs.keys()))
+
+    for devId in dev_keys:
+        histSummary = devs[devId][1]
+        summaries.append(histSummary)
+        yKeys = histSummary.getKeys()
+        yKeyspace = yKeyspace.union(yKeys)
+        for key in yKeys:
+            xKeyspace = xKeyspace.union(histSummary.at(key).getKeys())
+            
+    dev_clusters = cluster_mat(summaries, list(xKeyspace), list(yKeyspace))
+    return dev_clusters
+
+#def predictClusters(devs, labels):
+
+#    hlist = []
+#    for devid in devs.keys():
+#        hlist.append(devs[devid][1])
+
+#    classes = cluster_hist(hlist, labels)
+#    return classes
 
 def computeAcc(devs, trueClust, predClust):
 
@@ -125,18 +176,33 @@ def computeAcc(devs, trueClust, predClust):
 ### Main logic
 ###
 
-labels, devs = genDevices(40)
-addNoise(devs, 1.0)
-addNoise(devs, 0.001)
-for dev in devs:
-    print(devs[dev][0])
-    print(devs[dev][1].toJson())
+from mnist_rot_own import MNIST_ROT_OWN
+datacls = MNIST_ROT_OWN()
 
-clust = getTrueClusters(devs, labels)
-pred = predictClusters(devs, labels)
-print(clust)
-print(pred)
+print("Downloading Data...",end="")
+sys.stdout.flush()
+datacls.download_data()
 
-acc = computeAcc(devs, clust, pred)
-print("Accuracy: " + str(acc * 100) + "%")
+print(" Done.")
+
+labels, devs = genDevices(10, datacls)
+pred = predictClusters(devs)
+
+#addNoise(devs, 1.0)
+#addNoise(devs, 0.001)
+for idx, k in enumerate(devs.keys()):
+    print("Dev",k,":")
+    print("  Majority Label:    ", devs[k][0])
+    print("  Rotation:          ", devs[k][2])
+    print("  Cluster Assignment:", pred[idx])
+    #print("  ", devs[k][1].toJson())
+    #print("  ", devs[k][2])
+
+#clust = getTrueClusters(devs, labels)
+#pred = predictClusters(devs, labels)
+#print(clust)
+#print(pred)
+
+#acc = computeAcc(devs, clust, pred)
+#print("Accuracy: " + str(acc * 100) + "%")
 
