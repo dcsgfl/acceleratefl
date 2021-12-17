@@ -288,8 +288,8 @@ if __name__ == '__main__':
 
     # Training/Testing data
     datacls.download_data()
-    _, _ = datacls.get_training_data(devid)
-    _, _ = datacls.get_testing_data(devid)
+    _, _, _ = datacls.get_training_data(devid)
+    _, _, _ = datacls.get_testing_data(devid)
 
     heartbeat(args, True)
     
