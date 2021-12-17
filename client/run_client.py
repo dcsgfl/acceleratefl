@@ -184,7 +184,7 @@ def start_websocker_server_worker(id, host, port, dataset, datacls, hook, verbos
         verbose = verbose)
 
     # Training data
-    train_data, train_targets = datacls.get_training_data(id)
+    train_data, train_targets, rot = datacls.get_training_data(id)
     dataset_train = sy.BaseDataset(
         data = train_data,
         targets = train_targets,
@@ -193,7 +193,7 @@ def start_websocker_server_worker(id, host, port, dataset, datacls, hook, verbos
     server.add_dataset(dataset_train, key = dataset + '_TRAIN')
 
     # Testing data
-    test_data, test_targets = datacls.get_testing_data(id)
+    test_data, test_targets, rot = datacls.get_testing_data(id)
     dataset_test = sy.BaseDataset(
         data = test_data,
         targets = test_targets,
