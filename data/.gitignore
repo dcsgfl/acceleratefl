@@ -1,5 +1,6 @@
 cifar10
 mnist
 mnist_rot
+mnist_rnd
 femnist/train
 femnist/test
