@@ -1,7 +1,7 @@
-DATASET="MNISTROTOWN"
-SCHEDULER="PXYSched"
+DATASET="MNIST_ROT_OWN"
+SCHEDULER="RNDSched"
 DROP=0
-EPOCHS=400
+EPOCHS=200
 CLTHRES=10
 
 python3 run_server.py --dataset "${1:-$DATASET}" --scheduler "${2:-$SCHEDULER}" --drop "${3:-$DROP}" --epochs "${4:-$EPOCHS}" --threshold "${5:-$CLTHRES}"

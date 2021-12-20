@@ -45,7 +45,7 @@ from modelFactory import ModelFactory as mdlftry
 from schedulerFactory import SchedulerFactory as schedftry
 
 LOCK_TRACE = False
-EXPECTED_EPOCH_DURATION = 10.0
+EXPECTED_EPOCH_DURATION = 60.0
 
 def generateNetworkDelays(n=30):
 
@@ -330,6 +330,8 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
     hook = sy.TorchHook(torch)
     available_instances = {}
     available_devices =  {}
+    total_time = 0.0
+
     for curr_round in range(0, args.epochs):
 
         while True:
@@ -396,6 +398,7 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                 loss_values[worker_id] = worker_loss
 
         fit_time = actual_train_time + max_latency
+        total_time += fit_time
 
         traced_model = utils.federated_avg(models)
 
@@ -435,15 +438,16 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
 
             eval_end_time = time.time()
 
-            logging.info("EPOCH: " + str(curr_round) + " ACCURACY: "+ str(_correct/_total) + " FIT_TIME: " + str(fit_time))
+            #logging.info("EPOCH: " + str(curr_round) + " ACCURACY: "+ str(_correct/_total) + " FIT_TIME: " + str(fit_time))
             print("EPOCH:", curr_round, \
                   "AVG_ACCURACY:", _correct/_total, \
                   "#WORKERS:",     len(selected_worker_instances), \
-                  "SCHED TIME:",   schedule_end_time - schedule_start_time, \
-                  "TRAIN TIME:",   actual_train_time, \
-                  "TOTAL TRAIN:",  schedule_end_time - schedule_start_time + actual_train_time, \
-                  "FIT TIME:",     fit_time, \
-                  "EVAL TIME:",    eval_end_time - eval_start_time)
+                  "SCHED TIME:",   round(schedule_end_time - schedule_start_time, 4), \
+                  "TRAIN TIME:",   round(actual_train_time, 4), \
+                  "TOTAL TRAIN:",  round(schedule_end_time - schedule_start_time + actual_train_time, 4), \
+                  "FIT TIME:",     round(fit_time, 6), \
+                  "EVAL TIME:",    round(eval_end_time - eval_start_time, 4),
+                  "TOTAL:",        round(total_time, 4))
 
         # decay learning rate
         learning_rate = max(0.98 * learning_rate, args.lr * 0.01)

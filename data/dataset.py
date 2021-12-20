@@ -24,7 +24,7 @@ class Dataset:
     def generate_data(self, devid, maj_id, flag):
 
         # take 20 labels for 100 devices to get better clustering
-        random.seed(int(devid))
+        random.seed(0x1234 + int(devid))
         minlabel = self.min_label
         maxlabel = minlabel + 5
 

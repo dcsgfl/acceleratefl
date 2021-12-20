@@ -49,8 +49,8 @@ class Scheduler:
         clat  = {}
         cdevs = {}
 
-        RHO = 0.9   # Weight loss and latency reduction equally
-        USE_QUASI_RANDOM = True
+        RHO = 0.1   # Weight loss and latency reduction equally
+        USE_QUASI_RANDOM = False
 
         #
         # Compute the total loss in each cluster
@@ -60,7 +60,8 @@ class Scheduler:
 
             dev = available_devices[devId]
             clustId = dev["cluster"]
-            sqloss = math.pow(dev['loss'], 2.0)
+            #sqloss = math.pow(dev['loss'], 2.0)
+            sqloss = dev['loss']
             latency = dev['cpu_usage']
 
             if clustId not in closs.keys():
@@ -163,8 +164,8 @@ class Scheduler:
 
         else:
 
-            count = client_threshold
-            for i in range(count):
+            count = 0
+            while count < client_threshold:
 
                 idx = choices(range(len(clusters)), weights=probs)[0]
                 clust = clusters[idx]
@@ -174,6 +175,7 @@ class Scheduler:
                 if dev['loss'] > 0.0:
                     selected[dev['id']] = dev
                     selectedClusters.append(str(clust))
+                    count += 1
 
                 del devs[0]
                 if len(devs) == 0:

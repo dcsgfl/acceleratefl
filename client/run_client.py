@@ -283,8 +283,8 @@ if __name__ == '__main__':
     # set dataset class
     from datasetFactory import DatasetFactory as dftry
     from mnist_rot_own import MNIST_ROT_OWN
-    #datacls = dftry.getDataset(args.dataset)
-    datacls = MNIST_ROT_OWN()
+    datacls = dftry.getDataset(args.dataset)
+    #datacls = MNIST_ROT_OWN()
 
     # Training/Testing data
     datacls.download_data()
