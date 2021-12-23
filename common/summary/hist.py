@@ -43,6 +43,14 @@ class HistSummary(object):
     def at(self, key):
         return self.values[key]
 
+    def atFreq(self, key):
+
+        denom = 0.0
+        for key in self.values.keys():
+            denom += float(self.values[key])
+
+        return float(self.values[key]) / denom
+
     def getKeys(self):
         return set(self.values.keys())
 
@@ -85,6 +93,12 @@ class HistSummary(object):
         sqrtdevQ = np.sqrt(devQ)
         sumOfSqrOfDiffSqrtdevice = np.sum((sqrtdevP - sqrtdevQ) ** 2)
         return np.sqrt(sumOfSqrOfDiffSqrtdevice) / sqrt2
+
+    def scale(self, val):
+
+        for k in self.values.keys():
+            newValue = float(self.values[k]) * float(val)
+            self.values[k] = newValue
 
     """
     Serialization functions
