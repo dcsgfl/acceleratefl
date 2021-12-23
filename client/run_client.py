@@ -114,7 +114,7 @@ def send_summary(args, datacls):
     elif summaryType == "pxy":
 
         pyInput = list(map(str, train_y.tolist()))
-        pyHist = HistSummary(histInput)
+        pyHist = HistSummary(pyInput)
 
         train_x = tensor_train_x.numpy()
         histInput = {}
