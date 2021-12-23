@@ -36,7 +36,7 @@ from hist import HistSummary, HistMatSummary
 devid = ""
 
 DP_EPSILON = 0.1
-USE_FULL_JOINT = False
+USE_FULL_JOINT = True
 
 # register device with central server and get device id
 def register_to_central(args):
