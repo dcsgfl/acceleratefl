@@ -3,6 +3,7 @@ from mnist import MNIST
 from femnist import FEMNIST
 from mnist_rot import MNIST_ROT
 from mnist_rot_own import MNIST_ROT_OWN
+from mnist_rnd import MNIST_RND
 
 class DatasetFactory:
     factories = {}
