@@ -36,6 +36,7 @@ from hist import HistSummary, HistMatSummary
 devid = ""
 
 DP_EPSILON = 0.1
+USE_FULL_JOINT = False
 
 # register device with central server and get device id
 def register_to_central(args):
@@ -112,6 +113,9 @@ def send_summary(args, datacls):
 
     elif summaryType == "pxy":
 
+        pyInput = list(map(str, train_y.tolist()))
+        pyHist = HistSummary(pyInput)
+
         train_x = tensor_train_x.numpy()
         histInput = {}
         histMatInput = {}
@@ -120,7 +124,7 @@ def send_summary(args, datacls):
         for label in labelSpace:
             histInput[label] = []
 
-        if args.dataset.upper() == "CIFAR10" or args.dataset.upper() == "MNIST_ROT" or args.dataset.upper() == "MNIST_ROT_OWN":
+        if args.dataset.upper() == "CIFAR10" or args.dataset.upper() == "MNIST_ROT" or args.dataset.upper() == "MNIST_ROT_OWN" or args.dataset.upper() == "MNIST_RND":
 
             for yIdx in range(len(train_y)):
                 label = str(train_y[yIdx])
@@ -144,8 +148,14 @@ def send_summary(args, datacls):
 
 
         for label in labelSpace:
+
             hip = histInput[label]
-            histMatInput[label] = HistSummary(hip)
+            his = HistSummary(hip)
+
+            if USE_FULL_JOINT:
+                his.scale(pyHist.atFreq(label))
+
+            histMatInput[label] = his
 
         histSummary = HistMatSummary(histMatInput)
         histSummary.addNoise(DP_EPSILON)
