@@ -423,24 +423,24 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
                 _total+=total
                 
                 # For TiFL
-                devcentral.available_devices[devid]["loss"] = 1.0 - (float(correct) / float(total))
+                loss = 1.0 - (float(correct) / float(total))
+                devcentral.available_devices[devid]["loss"] = loss
 
                 # For Oort
                 global EXPECTED_EPOCH_DURATION
-                expected_fit_time = 3 * EXPECTED_EPOCH_DURATION
+                expected_latency = 1.0 * EXPECTED_EPOCH_DURATION
                 alpha = 2.0
-                loss = 1.0 - (float(correct) / float(total))
                 global_util = 1.0
                 dev_latency = devcentral.available_devices[devid]["cpu_usage"]
-                if expected_fit_time < dev_latency:
-                    global_util = (expected_fit_time / fit_time) ** alpha
+                if expected_latency < dev_latency:
+                    global_util = (expected_latency / dev_latency) ** alpha
                 devcentral.available_devices[devid]["util"] = loss * global_util
 
             eval_end_time = time.time()
 
             #logging.info("EPOCH: " + str(curr_round) + " ACCURACY: "+ str(_correct/_total) + " FIT_TIME: " + str(fit_time))
             print("EPOCH:", curr_round, \
-                  "AVG_ACCURACY:", _correct/_total, \
+                  "AVG_ACCURACY:", round(_correct/_total, 6), \
                   "#WORKERS:",     len(selected_worker_instances), \
                   "SCHED TIME:",   round(schedule_end_time - schedule_start_time, 4), \
                   "TRAIN TIME:",   round(actual_train_time, 4), \

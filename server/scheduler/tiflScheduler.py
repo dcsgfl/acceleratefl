@@ -73,7 +73,8 @@ class TIFLSched(Scheduler):
 
         self.n_tiers = min(n_available_devices, 5)
         self.tier_probs = np.ones(self.n_tiers) / float(self.n_tiers)
-        self.tier_credits = np.array([80, 50, 30, 20, 20])
+        self.tier_credits = np.array([36, 36, 36, 36, 36])
+        #self.tier_credits = np.array([80, 50, 30, 20, 20])
         #self.tier_credits = np.array([160, 100, 60, 40, 40])
         self.tier_counts = np.zeros(self.n_tiers)
 
