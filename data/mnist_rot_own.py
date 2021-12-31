@@ -74,7 +74,7 @@ class MNIST_ROT_OWN(Dataset):
         train_rot = []
 
         #rotation_angles = [0.0, 15.0, 30.0]
-        rotation_angles = [0.0, 30.0]
+        rotation_angles = [0.0, 45.0]
         for img in self.train_x:
             angle = np.random.choice(rotation_angles)
             train_rot.append(angle)
