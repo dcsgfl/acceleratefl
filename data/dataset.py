@@ -26,7 +26,7 @@ class Dataset:
         # take 20 labels for 100 devices to get better clustering
         random.seed(int(devid))
         minlabel = self.min_label
-        maxlabel = minlabel + 10
+        maxlabel = minlabel + 9
 
         # Ignoring the parm for now to avoid round robin.
         # This should add different sized clusters
