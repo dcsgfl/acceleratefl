@@ -24,16 +24,16 @@ class Dataset:
     def generate_data(self, devid, maj_id, flag):
 
         # take 20 labels for 100 devices to get better clustering
-        random.seed(0x1234 + int(devid))
+        random.seed(int(devid))
         minlabel = self.min_label
-        maxlabel = minlabel + 5
+        maxlabel = minlabel + 10
 
         # Ignoring the parm for now to avoid round robin.
         # This should add different sized clusters
         #my_label = maj_id
         my_label = random.randint(minlabel, maxlabel)
         #my_rot = random.choice([0.0, 15.0, 30.0])
-        my_rot = random.choice([0.0, 30.0])
+        my_rot = random.choice([0.0, 45.0])
 
         # remove my lable from available ones for adding noise
         noise_labels = [*range(minlabel, maxlabel + 1, 1)]
