@@ -89,8 +89,8 @@ class Dataset:
             selected_noise_idxs.extend(pruned_selected_noise_label_idxs)
 
         # concatenate noise idx and my label index to generate final set of idx
-        #self.generated_data_idxs = np.concatenate([pruned_my_label_idxs , selected_noise_idxs])
-        self.generated_data_idxs = np.array(pruned_my_label_idxs)
+        self.generated_data_idxs = np.concatenate([pruned_my_label_idxs , selected_noise_idxs])
+        #self.generated_data_idxs = np.array(pruned_my_label_idxs)
         np.random.shuffle(self.generated_data_idxs)
 
         self.generated_rot = my_rot
