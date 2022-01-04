@@ -438,6 +438,9 @@ async def train_and_eval(args, devcentral, client_threshold, verbose):
 
             eval_end_time = time.time()
 
+            # Print for per cluster loss values
+            print("## ", str(curr_round), " ", devid, " ", devcentral.available_devices[devid]["cluster"], " ", loss)
+
             #logging.info("EPOCH: " + str(curr_round) + " ACCURACY: "+ str(_correct/_total) + " FIT_TIME: " + str(fit_time))
             print("EPOCH:", curr_round, \
                   "AVG_ACCURACY:", round(_correct/_total, 6), \
