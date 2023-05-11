@@ -67,19 +67,6 @@ class HistSummary(object):
 
         devP = self.toFrequencyArray(allKeys)
         devQ = hist2.toFrequencyArray(allKeys)
-        #devP = np.zeros(len(allKeys))
-        #devQ = np.zeros(len(allKeys))
-
-        #idx = 0
-        #for k in allKeys:
-            
-        #    if k in self.values:
-        #        devP[idx] = float(self.values[k])
-
-        #    if k in hist2.values:
-        #        devQ[idx] = float(hist2.values[k])
-
-        #    idx = idx + 1
 
         sqrtdevP = np.sqrt(devP)
         sqrtdevQ = np.sqrt(devQ)
