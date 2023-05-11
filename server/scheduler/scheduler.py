@@ -94,8 +94,6 @@ class Scheduler:
             normLoss = closs[cid] / totalLoss
             p = RHO*latRed + (1.0 - RHO)*normLoss
 
-            #print("cluster",cid,"latRed",round(latRed,6),"loss",round(normLoss,6),"weight",round(p,6))
-
             clusters.append(cid)
             probs.append(p)
 
@@ -106,7 +104,6 @@ class Scheduler:
 
             utility = []
             for dev in cdevs[cid]:
-                #util = dev['loss'] / (1.0 + (dev['cpu_usage'] / 100.0))
                 util = 1.0 - dev['cpu_usage']
                 utility.append(util)
 
@@ -124,7 +121,6 @@ class Scheduler:
 
         if USE_QUASI_RANDOM:
 
-            # OK let's take the guesswork out of this...
             # time for some quasi-random draws
             for idx, cid in enumerate(clusters):
 
@@ -140,8 +136,6 @@ class Scheduler:
                     del devs[0]
 
                 if len(devs) == 0:
-                    # Remove this cluster from consideration
-                    #del clusters[i]
                     probs[idx] = 0.0
 
             while len(selectedClusters) < client_threshold:
@@ -154,8 +148,6 @@ class Scheduler:
                 del devs[0]
 
                 if len(devs) == 0:
-                    # Remove this cluster from consideration
-                    #del clusters[i]
                     cidx = clusters.index(clust)
                     probs[cidx] = 0.0
 
@@ -175,11 +167,7 @@ class Scheduler:
 
                 del devs[0]
                 if len(devs) == 0:
-                    # Remove this cluster from consideration
-                    #del clusters[idx]
-                    #del probs[idx]
                     probs[idx] = 0.0
 
-        #print("Scheduled clusters: ", ' '.join(map(str, selectedClusters)))
         return selected
 

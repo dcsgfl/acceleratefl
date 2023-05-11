@@ -57,8 +57,6 @@ class PXYSched(Scheduler):
             self.cluster_info[clustId]["count"] += 1
 
             all_devices[devId]['cluster'] = clustId
-            #logging.info("cpu_usage")
-            #logging.info(all_devices[devId]['cpu_usage'])
 
         print("Cluster Info:")
         for clustId in self.cluster_info.keys():
@@ -82,40 +80,9 @@ class PXYSched(Scheduler):
     def select_worker_instances(self, available_devices, client_threshold):
 
         if self.cluster_info is None:
-            # Someone forgot to call notify_worker_update() ...
-            # TODO this is really a bug... We might not have all the devices
             self.do_clustering(available_devices)
 
         return self._schedule_clusters(self.cluster_info, available_devices, client_threshold)
-        #return self._schedule_clusters_v2(self.cluster_info, available_devices, client_threshold)
-        # This is a little slow... (n^2) but just moving on for now
-        #selected_devices = {}
-        #for clusterId in self.cluster_ids: # For each identified cluster
-
-        #    bestDev = {}
-        #    for devId in available_devices.keys():  # For each device in that cluster
-
-        #        curDev = available_devices[devId].copy()
-    
-        #        if curDev['cluster'] == clusterId:
-
-        #            if len(bestDev.keys()) == 0:
-                        # This is the first device in cluster
-        #                bestDev = curDev.copy()
-        #            elif curDev["cpu_usage"] < bestDev["cpu_usage"]:
-                        # Is this device any faster?
-        #                bestDev = curDev.copy()
-
-                # TODO: these keys are also available to us...
-                #available_devices[request.id]['cpu_usage']
-                #available_devices[request.id]['ncpus']
-                #available_devices[request.id]['load']
-                #available_devices[request.id]['virtual_mem']
-                #available_devices[request.id]['battery']
-
-        #    selected_devices[bestDev["id"]] = bestDev.copy()
-
-        #return selected_devices
 
     def notify_worker_update(self, all_devices):
         self.do_clustering(all_devices)

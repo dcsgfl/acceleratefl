@@ -9,4 +9,4 @@ wait
 
 # Sample command
 # sh run.sh #clients dataset scheduler myip serverip
-# sh run.sh 25 FEMNIST rnd 128.101.118.103 128.101.118.86
+# sh run.sh 25 CIFAR10 py 1.2.3.4 1.2.3.5

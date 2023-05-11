@@ -160,20 +160,7 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         self.available_devices[request.id]['load'] = request.load15
         self.available_devices[request.id]['virtual_mem'] = request.virtual_mem
         self.available_devices[request.id]['battery'] = request.battery
-        # for TiFL
-        if "loss" not in self.available_devices[request.id].keys():
-            self.available_devices[request.id]['loss'] = 1.0
-        # For OORT
-        if "util" not in self.available_devices[request.id].keys():
-            self.available_devices[request.id]['util'] = 1.0
         self.unlock()
-
-        # logging.info(request.id + ': [cpu_usage: ' + str(request.cpu_usage) +
-        #                     ', ncpus: ' + str(request.ncpus) + 
-        #                     ', load: ' + str(request.load15) +
-        #                     ', virtual_mem: ' + str(request.virtual_mem) +
-        #                     ', battery: ' + str(request.battery) +
-        #                     ']')
 
         return devicetocentral_pb2.Pong(
             ack = True,
@@ -193,16 +180,6 @@ class DeviceToCentralServicer(devicetocentral_pb2_grpc.DeviceToCentralServicer):
         if self.n_available_devices == self.n_device_summaries:
             self.scheduler.notify_worker_update(self.available_devices)        
         self.unlock()
-        #logging.info('Data summary: ' + str(request.summary))
-
-        #while True:
-        #    self.lock()
-        #    if self.n_available_devices == self.n_device_summaries:
-        #        self.scheduler.notify_worker_update(self.available_devices)        
-        #        self.unlock()
-        #        break
-        #    else:
-        #        self.unlock()
 
         return devicetocentral_pb2.SummaryAck(
             ack = True,
@@ -249,8 +226,6 @@ async def fit_model_on_worker(worker, traced_model, batch_size, max_nr_batches, 
         optimizer="SGD",
         optimizer_args={"lr": lr, "momentum": 0.9},
     )
-    #base_latency = 45.0
-    #latency =  base_latency + usage
     latency = delay
 
     train_config.send(worker)
@@ -475,7 +450,7 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--dataset',
         type = str,
-        default='MNIST',
+        default='CIFAR10',
         help = 'Dataset used',
     )
 
@@ -503,7 +478,7 @@ def parse_arguments(args = sys.argv[1:]):
     parser.add_argument(
         '--scheduler',
         type = str,
-        default = 'RNDSched',
+        default = 'PYSched',
         help = 'Scheduler type',
     )
 

@@ -1,8 +1,5 @@
-from rndScheduler import RNDSched
 from pyScheduler import PYSched
 from pxyScheduler import PXYSched
-from tiflScheduler import TIFLSched
-from oortScheduler import OORTSched
 
 class SchedulerFactory:
     factories = {}
